@@ -10,7 +10,7 @@ A suite of beautiful, privacy-focused Android apps built for self-hosted infrast
 | [Merk](merk/) | Nextcloud Bookmarks client | 'com.brbrs.merk' | ✅ [Live on Google Play](https://play.google.com/store/apps/details?id=com.brbrs.merk) |
 | [Nóta](nota/) | Nextcloud Notes client | 'com.brbrs.nota' | ✅ [Live on Google Play](https://play.google.com/store/apps/details?id=com.brbrs.nota) |
 | [Qarib](qarib/) | A "want to visit" places app | 'com.brbrs.qarib' | ✅ [Live on Google Play](https://play.google.com/store/apps/details?id=com.brbrs.qarib) |
-| [Runa](runa/) | A personal jorunal | 'com.brbrs.runa' | ✅ [Live on Google Play](https://play.google.com/store/apps/details?id=com.brbrs.runa) |
+| [Runa](runa/) | A personal journal | 'com.brbrs.runa' | ✅ [Live on Google Play](https://play.google.com/store/apps/details?id=com.brbrs.runa) |
 | [Vinci](vinci/) | Nextcloud Personal CRM | 'com.brbrs.vinci' | ✅ [Live on Google Play](https://play.google.com/store/apps/details?id=com.brbrs.vinci) |
 
 ## Philosophy
