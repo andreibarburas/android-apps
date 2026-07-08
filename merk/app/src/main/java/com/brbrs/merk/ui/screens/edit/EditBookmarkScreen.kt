@@ -123,6 +123,7 @@ fun EditBookmarkScreen(
                             isEdit             -> "Edit bookmark"
                             else               -> "Add bookmark"
                         },
+                        style = MaterialTheme.typography.headlineMedium,
                         color = MaterialTheme.colorScheme.onBackground,
                     )
                 },

@@ -2,6 +2,14 @@
 
 All notable changes to Merk are documented here.
 
+## [1.1.0] - 2026-07-08
+
+At BARBURAS, all apps share the same design language and fonts are a big part of that. This update brings Merk in line with the rest of the suite.
+
+- ✨ New: optional font pairing in Settings > Display — DM Serif Display for headings, Inter Tight for all UI text. Toggle it on and see how it feels.
+
+---
+
 ## [1.0.7] - 2026-06-23
 
 - ✨ New: bookmark list now shows favicons fetched from your Nextcloud server, with a coloured initial avatar as fallback
@@ -35,6 +43,6 @@ All notable changes to Merk are documented here.
 
 ---
 
-## [1.0.0] - 2026-06-07
+## [1.0.0] - 2026-06-09
 
-- 🎉 Initial release
+- 🎉 Initial release — bookmark list with search and tag filtering, in-app browser, add/edit/delete bookmarks, share from any app, Nextcloud Login Flow v2, offline-first sync, biometric lock, light and dark mode

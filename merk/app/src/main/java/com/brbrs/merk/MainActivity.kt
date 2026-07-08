@@ -9,6 +9,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.runtime.*
 import com.brbrs.merk.ui.BookmarksNavHost
 import com.brbrs.merk.ui.theme.BookmarksTheme
+import com.brbrs.merk.ui.theme.FontPreference
 import com.brbrs.merk.ui.theme.TextScalePreference
 import com.brbrs.merk.ui.theme.ThemeRepository
 import dagger.hilt.android.AndroidEntryPoint
@@ -19,6 +20,7 @@ class MainActivity : FragmentActivity() {
 
     @Inject lateinit var themeRepository: ThemeRepository
     @Inject lateinit var textScalePreference: TextScalePreference
+    @Inject lateinit var fontPreference: FontPreference
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -28,11 +30,12 @@ class MainActivity : FragmentActivity() {
         val sharedTitle = extractSharedTitle(intent)
 
         setContent {
-            val isDark    by themeRepository.isDark.collectAsStateWithLifecycle(initialValue = true)
-            val textScale by textScalePreference.textScale.collectAsStateWithLifecycle(
+            val isDark         by themeRepository.isDark.collectAsStateWithLifecycle(initialValue = true)
+            val textScale      by textScalePreference.textScale.collectAsStateWithLifecycle(
                 initialValue = com.brbrs.merk.ui.theme.TextScale.DEFAULT
             )
-            BookmarksTheme(isDark = isDark, textScale = textScale.multiplier) {
+            val useCustomFont  by fontPreference.useCustomFont.collectAsStateWithLifecycle(initialValue = false)
+            BookmarksTheme(isDark = isDark, textScale = textScale.multiplier, useCustomFont = useCustomFont) {
                 BookmarksNavHost(
                     sharedUrl   = sharedUrl,
                     sharedTitle = sharedTitle,

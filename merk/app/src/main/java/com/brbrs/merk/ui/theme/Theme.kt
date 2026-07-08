@@ -97,12 +97,17 @@ fun merkTypography(multiplier: Float = 1.0f) = Typography(
 fun BookmarksTheme(
     isDark: Boolean = true,
     textScale: Float = 1.0f,
+    useCustomFont: Boolean = false,
     content: @Composable () -> Unit,
 ) {
+    val typography = when {
+        useCustomFont -> merkTypographyPaired(textScale)
+        else          -> merkTypography(textScale)
+    }
     CompositionLocalProvider(LocalIsDark provides isDark) {
         MaterialTheme(
             colorScheme = if (isDark) DarkColorScheme else LightColorScheme,
-            typography  = merkTypography(textScale),
+            typography  = typography,
             content     = content,
         )
     }

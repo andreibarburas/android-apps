@@ -8,6 +8,7 @@ import com.brbrs.merk.biometric.BiometricHelper
 import com.brbrs.merk.data.repository.BookmarkRepository
 import com.brbrs.merk.tasks.TasksOrgHelper
 import com.brbrs.merk.tasks.TasksPreference
+import com.brbrs.merk.ui.theme.FontPreference
 import com.brbrs.merk.ui.theme.TextScale
 import com.brbrs.merk.ui.theme.TextScalePreference
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -28,6 +29,7 @@ data class SettingsUiState(
     val isSyncing: Boolean          = false,
     val lastSynced: String          = "Never",
     val textScale: TextScale        = TextScale.DEFAULT,
+    val useCustomFont: Boolean      = false,
     val loggedOut: Boolean          = false,
 )
 
@@ -38,6 +40,7 @@ class SettingsViewModel @Inject constructor(
     private val repo: BookmarkRepository,
     private val tasksPref: TasksPreference,
     private val textScalePref: TextScalePreference,
+    private val fontPref: FontPreference,
 ) : ViewModel() {
 
     private val _syncing    = MutableStateFlow(false)
@@ -65,8 +68,8 @@ class SettingsViewModel @Inject constructor(
     }
 
     val uiState: StateFlow<SettingsUiState> = combine(
-        _base, textScalePref.textScale,
-    ) { base, scale ->
+        _base, textScalePref.textScale, fontPref.useCustomFont,
+    ) { base, scale, customFont ->
         SettingsUiState(
             serverUrl          = base.creds?.serverUrl,
             username           = base.creds?.username,
@@ -77,6 +80,7 @@ class SettingsViewModel @Inject constructor(
             isSyncing          = base.syncing,
             lastSynced         = base.lastSynced,
             textScale          = scale,
+            useCustomFont      = customFont,
             loggedOut          = base.loggedOut,
         )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), SettingsUiState())
@@ -100,6 +104,10 @@ class SettingsViewModel @Inject constructor(
 
     fun setTextScale(scale: TextScale) {
         viewModelScope.launch { textScalePref.setTextScale(scale) }
+    }
+
+    fun setUseCustomFont(enabled: Boolean) {
+        viewModelScope.launch { fontPref.setUseCustomFont(enabled) }
     }
 
     fun sync() {
