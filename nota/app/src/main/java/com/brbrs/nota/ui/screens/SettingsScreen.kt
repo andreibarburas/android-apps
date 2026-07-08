@@ -161,6 +161,18 @@ fun SettingsScreen(
                 }
             }
 
+            Spacer(Modifier.height(8.dp))
+
+            SettingsCard {
+                SettingsToggleRow(
+                    icon = Icons.Outlined.TextFields,
+                    title = "DM Serif + Inter Tight",
+                    subtitle = "Use custom font pairing for note titles and UI",
+                    checked = uiState.customFontEnabled,
+                    onCheckedChange = viewModel::setCustomFont,
+                )
+            }
+
             Spacer(Modifier.height(24.dp))
 
             // ── Integrations ──────────────────────────────────────────────────
@@ -271,7 +283,7 @@ fun SettingsScreen(
             Spacer(Modifier.height(32.dp))
 
             Text(
-                stringResource(R.string.app_footer, "1.2.2"),
+                stringResource(R.string.app_footer, "1.3.0"),
                 style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 textAlign = TextAlign.Center,

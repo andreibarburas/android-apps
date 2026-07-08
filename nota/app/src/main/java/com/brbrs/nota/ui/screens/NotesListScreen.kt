@@ -28,6 +28,9 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
+import com.brbrs.nota.ui.theme.DMSerifDisplayFontFamily
+import com.brbrs.nota.ui.theme.InterTightFontFamily
+import com.brbrs.nota.ui.theme.LocalCustomFontEnabled
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -52,6 +55,9 @@ fun NotesListScreen(
     val imageLoader by viewModel.imageLoader.collectAsState()
     val isDark by viewModel.isDark.collectAsState()
     val tasksEnabled by viewModel.tasksEnabled.collectAsState()
+    val customFont = LocalCustomFontEnabled.current
+    val noteTitleFont = if (customFont) DMSerifDisplayFontFamily else FontFamily.Serif
+    val noteBodyFont  = if (customFont) InterTightFontFamily     else FontFamily.SansSerif
 
     // Radial glow brush — green in dark, soft green in light
     val radialGlow = remember(isDark) {
@@ -177,7 +183,7 @@ fun NotesListScreen(
                         textStyle = TextStyle(
                             color = MaterialTheme.colorScheme.onSurface,
                             fontSize = 14.sp,
-                            fontFamily = FontFamily.SansSerif,
+                            fontFamily = noteBodyFont,
                         ),
                         singleLine = true,
                         modifier = Modifier.fillMaxWidth(),
@@ -339,6 +345,9 @@ private fun NoteCard(
     else
         Modifier.fillMaxWidth().vinciCard(isDark = isDark)
 
+    val customFont = LocalCustomFontEnabled.current
+    val noteTitleFont = if (customFont) DMSerifDisplayFontFamily else null
+
     Box(
         modifier = cardModifier
             .clickable(onClick = onClick)
@@ -353,7 +362,10 @@ private fun NoteCard(
             ) {
                 Text(
                     note.title.ifBlank { stringResource(R.string.untitled) },
-                    style = MaterialTheme.typography.titleLarge,
+                    style = if (noteTitleFont != null)
+                        MaterialTheme.typography.titleLarge.copy(fontFamily = noteTitleFont)
+                    else
+                        MaterialTheme.typography.titleLarge,
                     color = MaterialTheme.colorScheme.onSurface,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,

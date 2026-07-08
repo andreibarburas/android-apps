@@ -2,6 +2,13 @@
 
 All notable changes to Nóta are documented here.
 
+## [1.3.0] - 2026-07-08
+
+### Added
+- Optional font pairing in Settings → Display: DM Serif Display for headings, Inter Tight for all UI text — toggle it on and see how it feels
+
+---
+
 ## [1.2.2] - 2026-06-14
 
 ### Fixed
@@ -25,7 +32,8 @@ All notable changes to Nóta are documented here.
 
 ### Added
 - GPL v3 license
-- Localization support — strings externalized to `res/values/strings.xml`, Weblate-ready structure for future community translations
+- Localization support — strings externalized to `res/values/strings.xml`
+- Polish translation (`res/values-pl/strings.xml`) contributed by the community, Weblate-ready structure
 - In-app text size setting (Small / Default / Large / Extra Large) in Settings → Display, scales typography across the entire app
 
 ---

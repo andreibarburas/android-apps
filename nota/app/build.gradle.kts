@@ -14,8 +14,8 @@ android {
         applicationId = "com.brbrs.nota"
         minSdk = 28          // BiometricPrompt stable + BlurMaskFilter
         targetSdk = 35
-        versionCode = 8
-        versionName = "1.2.2"
+        versionCode = 9
+        versionName = "1.3.0"
     }
 
     buildTypes {

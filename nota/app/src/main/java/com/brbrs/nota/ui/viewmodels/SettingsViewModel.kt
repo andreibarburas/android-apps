@@ -9,6 +9,7 @@ import com.brbrs.nota.tasks.TasksOrgHelper
 import com.brbrs.nota.tasks.TasksPreference
 import com.brbrs.nota.ui.theme.TextScale
 import com.brbrs.nota.ui.theme.TextScalePreference
+import com.brbrs.nota.ui.theme.FontPreference
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.*
@@ -26,6 +27,7 @@ data class SettingsUiState(
     val tasksEnabled: Boolean = false,
     val tasksInstalled: Boolean = false,
     val textScale: TextScale = TextScale.DEFAULT,
+    val customFontEnabled: Boolean = false,
 )
 
 @HiltViewModel
@@ -35,34 +37,40 @@ class SettingsViewModel @Inject constructor(
     private val syncRepository: SyncRepository,
     private val tasksPref: TasksPreference,
     private val textScalePreference: TextScalePreference,
+    private val fontPreference: FontPreference,
 ) : ViewModel() {
 
     private val _lastSynced = MutableStateFlow("Never")
     private val _loggedOut  = MutableStateFlow(false)
 
     val uiState: StateFlow<SettingsUiState> = combine(
-        authRepository.session,
-        authRepository.appLockEnabled,
-        _lastSynced,
-        _loggedOut,
-        tasksPref.enabled,
+        combine(
+            authRepository.session,
+            authRepository.appLockEnabled,
+            _lastSynced,
+            _loggedOut,
+            tasksPref.enabled,
+        ) { session, appLock, synced, loggedOut, tasks ->
+            arrayOf(session, appLock, synced, loggedOut, tasks)
+        },
         textScalePreference.scale,
-    ) { arr ->
-        val session  = arr[0] as com.brbrs.nota.auth.NotaSession?
-        val appLock  = arr[1] as Boolean
-        val synced   = arr[2] as String
+        fontPreference.customFontEnabled,
+    ) { arr, textScale, customFont ->
+        val session   = arr[0] as com.brbrs.nota.auth.NotaSession?
+        val appLock   = arr[1] as Boolean
+        val synced    = arr[2] as String
         val loggedOut = arr[3] as Boolean
-        val tasks    = arr[4] as Boolean
-        val textScale = arr[5] as TextScale
+        val tasks     = arr[4] as Boolean
         SettingsUiState(
-            serverUrl      = session?.serverUrl ?: "",
-            username       = session?.username  ?: "",
-            appLockEnabled = appLock,
-            lastSynced     = synced,
-            loggedOut      = loggedOut,
-            tasksEnabled   = tasks,
-            tasksInstalled = TasksOrgHelper.isInstalled(context),
-            textScale      = textScale,
+            serverUrl          = session?.serverUrl ?: "",
+            username           = session?.username  ?: "",
+            appLockEnabled     = appLock,
+            lastSynced         = synced,
+            loggedOut          = loggedOut,
+            tasksEnabled       = tasks,
+            tasksInstalled     = TasksOrgHelper.isInstalled(context),
+            textScale          = textScale,
+            customFontEnabled  = customFont,
         )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), SettingsUiState())
 
@@ -76,6 +84,10 @@ class SettingsViewModel @Inject constructor(
 
     fun setTextScale(scale: TextScale) {
         viewModelScope.launch { textScalePreference.setScale(scale) }
+    }
+
+    fun setCustomFont(enabled: Boolean) {
+        viewModelScope.launch { fontPreference.setCustomFontEnabled(enabled) }
     }
 
     fun sync() {

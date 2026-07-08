@@ -8,6 +8,7 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
@@ -51,8 +52,28 @@ val LightText         = Color(0xFF0F1E0F)   // very dark green-black
 val LightTextDim      = Color(0xFF4E6E4E)   // muted green-grey
 val LightTextDimmer   = Color(0xFF7A9A7A)   // dimmer text
 
+// ── Custom font families ───────────────────────────────────────────────────────
+val InterTightFontFamily = FontFamily(
+    Font(com.brbrs.nota.R.font.inter_tight_thin,        FontWeight.Thin),
+    Font(com.brbrs.nota.R.font.inter_tight_extra_light, FontWeight.ExtraLight),
+    Font(com.brbrs.nota.R.font.inter_tight_light,       FontWeight.Light),
+    Font(com.brbrs.nota.R.font.inter_tight_regular,     FontWeight.Normal),
+    Font(com.brbrs.nota.R.font.inter_tight_medium,      FontWeight.Medium),
+    Font(com.brbrs.nota.R.font.inter_tight_semi_bold,   FontWeight.SemiBold),
+    Font(com.brbrs.nota.R.font.inter_tight_bold,        FontWeight.Bold),
+    Font(com.brbrs.nota.R.font.inter_tight_extra_bold,  FontWeight.ExtraBold),
+    Font(com.brbrs.nota.R.font.inter_tight_black,       FontWeight.Black),
+)
+
+val DMSerifDisplayFontFamily = FontFamily(
+    Font(com.brbrs.nota.R.font.dm_serif_display_regular, FontWeight.Normal),
+)
+
 // ── CompositionLocal for isDark ───────────────────────────────────────────────
 val LocalIsDark = compositionLocalOf { true }
+
+// ── CompositionLocal for custom font toggle ───────────────────────────────────
+val LocalCustomFontEnabled = compositionLocalOf { false }
 
 // ── Color schemes ─────────────────────────────────────────────────────────────
 private val DarkColorScheme = darkColorScheme(
@@ -96,20 +117,25 @@ private fun TextStyle.scaled(multiplier: Float): TextStyle = copy(
     lineHeight = if (lineHeight != androidx.compose.ui.unit.TextUnit.Unspecified) lineHeight * multiplier else lineHeight,
 )
 
-fun notaTypography(scaleMultiplier: Float = 1f): Typography {
+fun notaTypography(scaleMultiplier: Float = 1f, customFont: Boolean = false): Typography {
+    // When custom font is on: DM Serif Display for display/headline (titles),
+    // Inter Tight for everything else. Default: system Serif/SansSerif.
+    val titleFont = if (customFont) DMSerifDisplayFontFamily else displayFont
+    val uiFont    = if (customFont) InterTightFontFamily     else bodyFont
+
     val base = Typography(
-        displayLarge   = TextStyle(fontFamily = displayFont, fontSize = 40.sp, fontWeight = FontWeight.Normal,    lineHeight = 48.sp, letterSpacing = (-0.5).sp),
-        headlineLarge  = TextStyle(fontFamily = displayFont, fontSize = 32.sp, fontWeight = FontWeight.Normal,    lineHeight = 40.sp, letterSpacing = (-0.3).sp),
-        headlineMedium = TextStyle(fontFamily = displayFont, fontSize = 24.sp, fontWeight = FontWeight.Normal),
-        titleLarge     = TextStyle(fontFamily = bodyFont,    fontSize = 16.sp, fontWeight = FontWeight.SemiBold),
-        titleMedium    = TextStyle(fontFamily = bodyFont,    fontSize = 14.sp, fontWeight = FontWeight.Medium),
-        titleSmall     = TextStyle(fontFamily = bodyFont,    fontSize = 12.sp, fontWeight = FontWeight.Medium,    letterSpacing = 0.1.sp),
-        bodyLarge      = TextStyle(fontFamily = bodyFont,    fontSize = 15.sp, fontWeight = FontWeight.Normal,    lineHeight = 24.sp),
-        bodyMedium     = TextStyle(fontFamily = bodyFont,    fontSize = 13.sp, fontWeight = FontWeight.Normal,    lineHeight = 20.sp),
-        bodySmall      = TextStyle(fontFamily = bodyFont,    fontSize = 11.sp, fontWeight = FontWeight.Normal,    lineHeight = 16.sp),
-        labelLarge     = TextStyle(fontFamily = bodyFont,    fontSize = 12.sp, fontWeight = FontWeight.SemiBold,  letterSpacing = 0.5.sp),
-        labelMedium    = TextStyle(fontFamily = bodyFont,    fontSize = 11.sp, fontWeight = FontWeight.Medium,    letterSpacing = 0.4.sp),
-        labelSmall     = TextStyle(fontFamily = bodyFont,    fontSize = 10.sp, fontWeight = FontWeight.SemiBold,  letterSpacing = 0.12.sp),
+        displayLarge   = TextStyle(fontFamily = titleFont, fontSize = 40.sp, fontWeight = FontWeight.Normal,    lineHeight = 48.sp, letterSpacing = (-0.5).sp),
+        headlineLarge  = TextStyle(fontFamily = titleFont, fontSize = 32.sp, fontWeight = FontWeight.Normal,    lineHeight = 40.sp, letterSpacing = (-0.3).sp),
+        headlineMedium = TextStyle(fontFamily = titleFont, fontSize = 24.sp, fontWeight = FontWeight.Normal),
+        titleLarge     = TextStyle(fontFamily = uiFont,    fontSize = 16.sp, fontWeight = FontWeight.SemiBold),
+        titleMedium    = TextStyle(fontFamily = uiFont,    fontSize = 14.sp, fontWeight = FontWeight.Medium),
+        titleSmall     = TextStyle(fontFamily = uiFont,    fontSize = 12.sp, fontWeight = FontWeight.Medium,    letterSpacing = 0.1.sp),
+        bodyLarge      = TextStyle(fontFamily = uiFont,    fontSize = 15.sp, fontWeight = FontWeight.Normal,    lineHeight = 24.sp),
+        bodyMedium     = TextStyle(fontFamily = uiFont,    fontSize = 13.sp, fontWeight = FontWeight.Normal,    lineHeight = 20.sp),
+        bodySmall      = TextStyle(fontFamily = uiFont,    fontSize = 11.sp, fontWeight = FontWeight.Normal,    lineHeight = 16.sp),
+        labelLarge     = TextStyle(fontFamily = uiFont,    fontSize = 12.sp, fontWeight = FontWeight.SemiBold,  letterSpacing = 0.5.sp),
+        labelMedium    = TextStyle(fontFamily = uiFont,    fontSize = 11.sp, fontWeight = FontWeight.Medium,    letterSpacing = 0.4.sp),
+        labelSmall     = TextStyle(fontFamily = uiFont,    fontSize = 10.sp, fontWeight = FontWeight.SemiBold,  letterSpacing = 0.12.sp),
     )
     if (scaleMultiplier == 1f) return base
     return Typography(
@@ -128,19 +154,23 @@ fun notaTypography(scaleMultiplier: Float = 1f): Typography {
     )
 }
 
-// Default (1x) typography — kept for any direct references
+// Default (1x, system fonts) typography — kept for any direct references
 val NotaTypography = notaTypography(1f)
 
 @Composable
 fun NotaTheme(
     isDark: Boolean = true,
     textScaleMultiplier: Float = 1f,
+    customFont: Boolean = false,
     content: @Composable () -> Unit,
 ) {
-    CompositionLocalProvider(LocalIsDark provides isDark) {
+    CompositionLocalProvider(
+        LocalIsDark provides isDark,
+        LocalCustomFontEnabled provides customFont,
+    ) {
         MaterialTheme(
             colorScheme = if (isDark) DarkColorScheme else LightColorScheme,
-            typography  = notaTypography(textScaleMultiplier),
+            typography  = notaTypography(textScaleMultiplier, customFont),
             content     = content,
         )
     }

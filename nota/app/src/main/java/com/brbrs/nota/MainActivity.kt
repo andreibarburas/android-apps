@@ -15,6 +15,7 @@ import com.brbrs.nota.ui.NotaNavGraph
 import com.brbrs.nota.ui.theme.NotaTheme
 import com.brbrs.nota.ui.theme.TextScalePreference
 import com.brbrs.nota.ui.theme.ThemeRepository
+import com.brbrs.nota.ui.theme.FontPreference
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
@@ -23,6 +24,7 @@ class MainActivity : FragmentActivity() {
 
     @Inject lateinit var themeRepository: ThemeRepository
     @Inject lateinit var textScalePreference: TextScalePreference
+    @Inject lateinit var fontPreference: FontPreference
 
     var sharedImageUri: Uri? = null
 
@@ -38,8 +40,9 @@ class MainActivity : FragmentActivity() {
             val textScale by textScalePreference.scale.collectAsStateWithLifecycle(
                 initialValue = com.brbrs.nota.ui.theme.TextScale.DEFAULT
             )
+            val customFont by fontPreference.customFontEnabled.collectAsStateWithLifecycle(initialValue = false)
 
-            NotaTheme(isDark = isDark, textScaleMultiplier = textScale.multiplier) {
+            NotaTheme(isDark = isDark, textScaleMultiplier = textScale.multiplier, customFont = customFont) {
                 Surface(modifier = Modifier.fillMaxSize()) {
                     NotaNavGraph(
                         sharedText     = sharedText,

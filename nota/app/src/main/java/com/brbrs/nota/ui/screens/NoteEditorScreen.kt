@@ -27,6 +27,9 @@ import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
+import com.brbrs.nota.ui.theme.DMSerifDisplayFontFamily
+import com.brbrs.nota.ui.theme.InterTightFontFamily
+import com.brbrs.nota.ui.theme.LocalCustomFontEnabled
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.fragment.app.FragmentActivity
@@ -53,6 +56,9 @@ fun NoteEditorScreen(
     val context = LocalContext.current
     val activity = context as FragmentActivity
     val uiState by viewModel.uiState.collectAsState()
+    val customFont = LocalCustomFontEnabled.current
+    val noteTitleFont = if (customFont) DMSerifDisplayFontFamily else FontFamily.Serif
+    val noteBodyFont  = if (customFont) InterTightFontFamily     else FontFamily.SansSerif
 
     LaunchedEffect(noteId) { viewModel.loadNote(noteId, initialCategory, sharedText) }
 
@@ -217,7 +223,7 @@ fun NoteEditorScreen(
                                 BasicTextField(
                                     value = if (uiState.category !in categories) uiState.category else "",
                                     onValueChange = viewModel::onCategoryChanged,
-                                    textStyle = TextStyle(color = MaterialTheme.colorScheme.onBackground, fontSize = 14.sp, fontFamily = FontFamily.SansSerif),
+                                    textStyle = TextStyle(color = MaterialTheme.colorScheme.onBackground, fontSize = 14.sp, fontFamily = noteBodyFont),
                                     cursorBrush = SolidColor(CyanPrimary),
                                     decorationBox = { inner ->
                                         if (uiState.category.isBlank() || uiState.category in categories) {
@@ -241,14 +247,14 @@ fun NoteEditorScreen(
                     textStyle = TextStyle(
                         color = MaterialTheme.colorScheme.onBackground,
                         fontSize = 28.sp,
-                        fontFamily = FontFamily.Serif,
+                        fontFamily = noteTitleFont,
                         lineHeight = 36.sp,
                     ),
                     cursorBrush = SolidColor(CyanPrimary),
                     decorationBox = { inner ->
                         Box(modifier = Modifier.padding(horizontal = 24.dp, vertical = 4.dp)) {
                             if (uiState.title.isEmpty()) {
-                                Text(stringResource(R.string.title_placeholder), style = TextStyle(color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 28.sp, fontFamily = FontFamily.Serif))
+                                Text(stringResource(R.string.title_placeholder), style = TextStyle(color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 28.sp, fontFamily = noteTitleFont))
                             }
                             inner()
                         }
@@ -329,7 +335,7 @@ fun NoteEditorScreen(
                                     color = MaterialTheme.colorScheme.onSurface,
                                     fontSize = 15.sp,
                                     lineHeight = 24.sp,
-                                    fontFamily = FontFamily.SansSerif,
+                                    fontFamily = noteBodyFont,
                                 ),
                                 cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
                                 decorationBox = { inner ->
@@ -399,7 +405,7 @@ fun NoteEditorScreen(
                     }
 
                     Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                        Text(stringResource(R.string.note_locked), style = MaterialTheme.typography.headlineMedium.copy(fontFamily = androidx.compose.ui.text.font.FontFamily.Serif), color = MaterialTheme.colorScheme.onBackground)
+                        Text(stringResource(R.string.note_locked), style = MaterialTheme.typography.headlineMedium.copy(fontFamily = noteTitleFont), color = MaterialTheme.colorScheme.onBackground)
                         Text(
                             stringResource(R.string.note_locked_description),
                             style = MaterialTheme.typography.bodyMedium,

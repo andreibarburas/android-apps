@@ -50,7 +50,7 @@ object AppModule {
             .addInterceptor { chain ->
                 chain.proceed(
                     chain.request().newBuilder()
-                        .header("User-Agent", "Nota/1.0.0 (Android)")
+                        .header("User-Agent", "Nota/1.3.0 (Android)")
                         .build()
                 )
             }
