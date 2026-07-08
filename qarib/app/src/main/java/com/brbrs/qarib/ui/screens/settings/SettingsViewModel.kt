@@ -31,6 +31,7 @@ data class SettingsUiState(
     val appLockEnabled: Boolean = false,
     val themeMode: String = "system",
     val textSize: String = "default",
+    val useCustomFont: Boolean = false,
     val geofenceRadiusMeters: Int = com.brbrs.qarib.ui.theme.DEFAULT_GEOFENCE_RADIUS_METERS,
     val activeGeofenceCount: Int = 0,
     val lastSyncAt: Long? = null,
@@ -95,6 +96,7 @@ class SettingsViewModel @Inject constructor(
             appLockEnabled = appLock,
             themeMode = display.themeMode,
             textSize = display.textSize,
+            useCustomFont = display.useCustomFont,
             geofenceRadiusMeters = display.geofenceRadiusMeters,
             activeGeofenceCount = flags.activeGeofenceCount,
             lastSyncAt = flags.lastSyncAt,
@@ -111,6 +113,10 @@ class SettingsViewModel @Inject constructor(
 
     fun setTextSize(size: String) {
         viewModelScope.launch { displayPrefs.setTextSize(size) }
+    }
+
+    fun setUseCustomFont(enabled: Boolean) {
+        viewModelScope.launch { displayPrefs.setUseCustomFont(enabled) }
     }
 
     fun setGeofenceRadius(radiusMeters: Int) {

@@ -100,6 +100,8 @@
     <string name="settings_theme_light">Light</string>
     <string name="settings_theme_dark">Dark</string>
     <string name="settings_text_size_label">Text size</string>
+    <string name="settings_custom_font_label">DM Serif + Inter Tight</string>
+    <string name="settings_custom_font_subtitle">Custom font pairing</string>
     <string name="settings_text_size_small">Small</string>
     <string name="settings_text_size_default">Default</string>
     <string name="settings_text_size_large">Large</string>
@@ -122,7 +124,7 @@
     <string name="settings_privacy_policy_subtitle">How Qarib handles your data</string>
     <string name="settings_view_on_github">View on GitHub</string>
     <string name="settings_view_on_github_subtitle">Feedback, feature requests and source code</string>
-    <string name="settings_footer">Qarib 1.0.0 · by andrei BARBURAS</string>
+    <string name="settings_footer">Qarib 1.1.0 · by andrei BARBURAS</string>
 
     <!-- App lock screen -->
     <string name="applock_touch_to_unlock_hint">Touch the sensor to unlock</string>

@@ -1,5 +1,10 @@
 # Changelog
 
+## [1.1.0] - 2026-07-08
+
+✨ New:
+- Optional font pairing in Settings > Display — DM Serif Display for place names and headings, Inter Tight for all UI text
+
 ## [1.0.0] - 2026-06-23
 
 ### Initial release

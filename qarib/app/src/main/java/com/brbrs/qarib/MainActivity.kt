@@ -63,12 +63,12 @@ class MainActivity : FragmentActivity() {
 
             val themeMode = when (state.themeMode) {
                 "light" -> ThemeMode.LIGHT
-                "dark" -> ThemeMode.DARK
-                else -> ThemeMode.SYSTEM
+                "dark"  -> ThemeMode.DARK
+                else    -> ThemeMode.SYSTEM
             }
             val textScale = textSizeMultiplier(state.textSize)
 
-            QaribTheme(themeMode = themeMode, textScale = textScale) {
+            QaribTheme(themeMode = themeMode, textScale = textScale, useCustomFont = state.useCustomFont) {
                 if (state.isReady) {
                     QaribNavHost()
                 }
@@ -169,6 +169,7 @@ private fun QaribNavHost() {
 data class RootUiState(
     val themeMode: String = "system",
     val textSize: String = "default",
+    val useCustomFont: Boolean = false,
     val isReady: Boolean = false
 )
 
@@ -183,9 +184,10 @@ class RootViewModel @Inject constructor(
         authRepository.session
     ) { display, _ ->
         RootUiState(
-            themeMode = display.themeMode,
-            textSize = display.textSize,
-            isReady = true
+            themeMode     = display.themeMode,
+            textSize      = display.textSize,
+            useCustomFont = display.useCustomFont,
+            isReady       = true
         )
     }.stateIn(viewModelScope, SharingStarted.Eagerly, RootUiState())
 }

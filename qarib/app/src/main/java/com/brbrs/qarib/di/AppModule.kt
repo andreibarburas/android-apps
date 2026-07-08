@@ -62,7 +62,7 @@ object AppModule {
             .addInterceptor { chain ->
                 chain.proceed(
                     chain.request().newBuilder()
-                        .header("User-Agent", "Qarib/1.0.0 (Android)")
+                        .header("User-Agent", "Qarib/1.1.0 (Android)")
                         .build()
                 )
             }

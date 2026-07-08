@@ -10,13 +10,7 @@ Part of the [BARBURAS](https://barburas.com) open-source Android suite.
 
 ## Screenshots
 
-| Map View | List View | Search/Add |
-|------|----------------|---------------|
-| ![Map View](fastlane/metadata/android/en-US/images/phoneScreenshots/01.png) | ![List View](fastlane/metadata/android/en-US/images/phoneScreenshots/02.png) | ![Search/Add](fastlane/metadata/android/en-US/images/phoneScreenshots/03.png) |
-
-| Add View | Settings | Dark Mode |
-|----------|----------|-----------|
-| ![Add View](fastlane/metadata/android/en-US/images/phoneScreenshots/04.png) | ![Settings](fastlane/metadata/android/en-US/images/phoneScreenshots/05.png) | ![Dark](fastlane/metadata/android/en-US/images/phoneScreenshots/06.png) |
+<!-- screenshots -->
 
 ---
 
@@ -74,7 +68,7 @@ Parts of this app were developed with AI assistance. I always disclose this upfr
 
 ## Links
 
-- [Play Store](https://play.google.com/store/apps/details?id=com.brbrs.qarib)
+- [Play Store](https://play.google.com/store/apps/dev?id=6842866278906089090)
 - [Privacy Policy](https://barburas.com/privacy-policy/)
 - [Donate](https://bunq.me/barburasdonations)
 - [More apps by BARBURAS](https://barburas.com)
@@ -84,3 +78,5 @@ Parts of this app were developed with AI assistance. I always disclose this upfr
 ## License
 
 [GNU General Public License v3.0](LICENSE)
+
+Copyright © 2024 BARBURAS
