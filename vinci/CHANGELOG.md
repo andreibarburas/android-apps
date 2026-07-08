@@ -5,6 +5,12 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
 ---
 
+## [1.4.0]
+### Added
+- Optional font pairing in Settings → Display: DM Serif Display for headings, Inter Tight for all UI text — consistent with the rest of the BARBURAS suite.
+
+---
+
 ## [1.3.4]
 ### Added
 - Multi-device restore: interactions and starred contacts now restore correctly on a second device (tablet, new phone).

@@ -28,6 +28,8 @@ data class DisplayPreferences(
     val attachmentsKeepLocal: Boolean = false,
     /** Text size scale: "small", "default", "large", or "extra_large". */
     val textSize: String = "default",
+    /** If true, use DM Serif Display + Inter Tight font pairing. */
+    val useCustomFont: Boolean = false,
 )
 
 /** Density multipliers applied to the base typography scale for each text size option. */
@@ -48,6 +50,7 @@ class DisplayPreferencesRepository @Inject constructor(
     private val DEFAULT_COUNTRY_CODE     = stringPreferencesKey("default_country_code")
     private val ATTACHMENTS_KEEP_LOCAL   = booleanPreferencesKey("attachments_keep_local")
     private val TEXT_SIZE                = stringPreferencesKey("text_size")
+    private val USE_CUSTOM_FONT          = booleanPreferencesKey("use_custom_font")
 
     val preferences: Flow<DisplayPreferences> = context.displayDataStore.data.map { prefs ->
         DisplayPreferences(
@@ -57,6 +60,7 @@ class DisplayPreferencesRepository @Inject constructor(
             defaultCountryCode     = prefs[DEFAULT_COUNTRY_CODE]     ?: "",
             attachmentsKeepLocal   = prefs[ATTACHMENTS_KEEP_LOCAL]   ?: false,
             textSize               = prefs[TEXT_SIZE]                ?: "default",
+            useCustomFont          = prefs[USE_CUSTOM_FONT]          ?: false,
         )
     }
 
@@ -84,6 +88,10 @@ class DisplayPreferencesRepository @Inject constructor(
 
     suspend fun setTextSize(size: String) {
         context.displayDataStore.edit { it[TEXT_SIZE] = size }
+    }
+
+    suspend fun setUseCustomFont(enabled: Boolean) {
+        context.displayDataStore.edit { it[USE_CUSTOM_FONT] = enabled }
     }
 
     /** Returns current preferences as a map suitable for Nextcloud upload. */

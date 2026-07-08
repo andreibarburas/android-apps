@@ -8,11 +8,13 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 import androidx.compose.material3.Typography
 import androidx.compose.ui.unit.TextUnit
+import com.brbrs.vinci.R
 
 // ── Dark palette ──────────────────────────────────────────────────────────────
 val NavyDeep      = Color(0xFF080C18)   // deeper, richer black-blue
@@ -109,46 +111,71 @@ private val LightColorScheme = lightColorScheme(
     scrim               = Color(0x66000000),
 )
 
-// ── Typography ────────────────────────────────────────────────────────────────
-private val displayFont = FontFamily.Serif
-private val bodyFont    = FontFamily.SansSerif
+// ── Font families ─────────────────────────────────────────────────────────────
 
-val VinciTypography = Typography(
-    displayLarge   = TextStyle(fontFamily = displayFont,  fontSize = 44.sp, fontWeight = FontWeight.Normal,   lineHeight = 52.sp, letterSpacing = (-0.5).sp),
-    headlineLarge  = TextStyle(fontFamily = displayFont,  fontSize = 34.sp, fontWeight = FontWeight.Normal,   lineHeight = 42.sp, letterSpacing = (-0.3).sp),
-    headlineMedium = TextStyle(fontFamily = displayFont,  fontSize = 26.sp, fontWeight = FontWeight.Normal,   lineHeight = 34.sp, letterSpacing = (-0.2).sp),
-    headlineSmall  = TextStyle(fontFamily = displayFont,  fontSize = 22.sp, fontWeight = FontWeight.Normal,   lineHeight = 30.sp),
-    titleLarge     = TextStyle(fontFamily = bodyFont,     fontSize = 17.sp, fontWeight = FontWeight.SemiBold, letterSpacing = (-0.1).sp),
-    titleMedium    = TextStyle(fontFamily = bodyFont,     fontSize = 15.sp, fontWeight = FontWeight.SemiBold, letterSpacing = (-0.05).sp),
-    titleSmall     = TextStyle(fontFamily = bodyFont,     fontSize = 13.sp, fontWeight = FontWeight.Medium),
-    bodyLarge      = TextStyle(fontFamily = bodyFont,     fontSize = 15.sp, fontWeight = FontWeight.Normal,   lineHeight = 24.sp),
-    bodyMedium     = TextStyle(fontFamily = bodyFont,     fontSize = 13.sp, fontWeight = FontWeight.Normal,   lineHeight = 20.sp),
-    bodySmall      = TextStyle(fontFamily = bodyFont,     fontSize = 11.sp, fontWeight = FontWeight.Normal,   lineHeight = 16.sp),
-    labelLarge     = TextStyle(fontFamily = bodyFont,     fontSize = 12.sp, fontWeight = FontWeight.SemiBold, letterSpacing = 0.06.sp),
-    labelMedium    = TextStyle(fontFamily = bodyFont,     fontSize = 11.sp, fontWeight = FontWeight.SemiBold, letterSpacing = 0.08.sp),
-    labelSmall     = TextStyle(fontFamily = bodyFont,     fontSize = 10.sp, fontWeight = FontWeight.SemiBold, letterSpacing = 0.12.sp),
+// DM Serif Display — used for display/headline styles (contact names, screen titles)
+val DMSerifDisplayFamily = FontFamily(
+    Font(R.font.dm_serif_display_regular, FontWeight.Normal),
 )
 
-/** Returns [VinciTypography] with every font size and line height scaled by [scale]. */
-fun scaledTypography(scale: Float): Typography {
+// Inter Tight — used for all UI body/label/title text
+val InterTightFamily = FontFamily(
+    Font(R.font.inter_tight_thin,        FontWeight.Thin),
+    Font(R.font.inter_tight_extra_light, FontWeight.ExtraLight),
+    Font(R.font.inter_tight_light,       FontWeight.Light),
+    Font(R.font.inter_tight_regular,     FontWeight.Normal),
+    Font(R.font.inter_tight_medium,      FontWeight.Medium),
+    Font(R.font.inter_tight_semi_bold,   FontWeight.SemiBold),
+    Font(R.font.inter_tight_bold,        FontWeight.Bold),
+    Font(R.font.inter_tight_extra_bold,  FontWeight.ExtraBold),
+    Font(R.font.inter_tight_black,       FontWeight.Black),
+)
+
+// ── Typography ────────────────────────────────────────────────────────────────
+
+fun buildTypography(displayFont: FontFamily, bodyFont: FontFamily) = Typography(
+    displayLarge   = TextStyle(fontFamily = displayFont, fontSize = 44.sp, fontWeight = FontWeight.Normal,   lineHeight = 52.sp, letterSpacing = (-0.5).sp),
+    headlineLarge  = TextStyle(fontFamily = displayFont, fontSize = 34.sp, fontWeight = FontWeight.Normal,   lineHeight = 42.sp, letterSpacing = (-0.3).sp),
+    headlineMedium = TextStyle(fontFamily = displayFont, fontSize = 26.sp, fontWeight = FontWeight.Normal,   lineHeight = 34.sp, letterSpacing = (-0.2).sp),
+    headlineSmall  = TextStyle(fontFamily = displayFont, fontSize = 22.sp, fontWeight = FontWeight.Normal,   lineHeight = 30.sp),
+    titleLarge     = TextStyle(fontFamily = bodyFont,    fontSize = 17.sp, fontWeight = FontWeight.SemiBold, letterSpacing = (-0.2).sp),
+    titleMedium    = TextStyle(fontFamily = bodyFont,    fontSize = 15.sp, fontWeight = FontWeight.SemiBold, letterSpacing = (-0.15).sp),
+    titleSmall     = TextStyle(fontFamily = bodyFont,    fontSize = 13.sp, fontWeight = FontWeight.Medium,   letterSpacing = (-0.1).sp),
+    bodyLarge      = TextStyle(fontFamily = bodyFont,    fontSize = 15.sp, fontWeight = FontWeight.Normal,   lineHeight = 24.sp, letterSpacing = (-0.1).sp),
+    bodyMedium     = TextStyle(fontFamily = bodyFont,    fontSize = 13.sp, fontWeight = FontWeight.Normal,   lineHeight = 20.sp, letterSpacing = (-0.05).sp),
+    bodySmall      = TextStyle(fontFamily = bodyFont,    fontSize = 11.sp, fontWeight = FontWeight.Normal,   lineHeight = 16.sp),
+    labelLarge     = TextStyle(fontFamily = bodyFont,    fontSize = 12.sp, fontWeight = FontWeight.SemiBold, letterSpacing = 0.04.sp),
+    labelMedium    = TextStyle(fontFamily = bodyFont,    fontSize = 11.sp, fontWeight = FontWeight.SemiBold, letterSpacing = 0.06.sp),
+    labelSmall     = TextStyle(fontFamily = bodyFont,    fontSize = 10.sp, fontWeight = FontWeight.Medium,   letterSpacing = 0.08.sp),
+)
+
+// Default: system serif + system sans-serif
+val VinciTypography = buildTypography(FontFamily.Serif, FontFamily.SansSerif)
+
+// Paired: DM Serif Display headlines + Inter Tight body
+val VinciTypographyPaired = buildTypography(DMSerifDisplayFamily, InterTightFamily)
+
+/** Returns typography scaled by [scale]. */
+fun scaledTypography(scale: Float, useCustomFont: Boolean = false): Typography {
+    val base = if (useCustomFont) VinciTypographyPaired else VinciTypography
     fun TextStyle.scaled() = copy(
         fontSize   = fontSize * scale,
         lineHeight = if (lineHeight != TextUnit.Unspecified) lineHeight * scale else lineHeight,
     )
     return Typography(
-        displayLarge   = VinciTypography.displayLarge.scaled(),
-        headlineLarge  = VinciTypography.headlineLarge.scaled(),
-        headlineMedium = VinciTypography.headlineMedium.scaled(),
-        headlineSmall  = VinciTypography.headlineSmall.scaled(),
-        titleLarge     = VinciTypography.titleLarge.scaled(),
-        titleMedium    = VinciTypography.titleMedium.scaled(),
-        titleSmall     = VinciTypography.titleSmall.scaled(),
-        bodyLarge      = VinciTypography.bodyLarge.scaled(),
-        bodyMedium     = VinciTypography.bodyMedium.scaled(),
-        bodySmall      = VinciTypography.bodySmall.scaled(),
-        labelLarge     = VinciTypography.labelLarge.scaled(),
-        labelMedium    = VinciTypography.labelMedium.scaled(),
-        labelSmall     = VinciTypography.labelSmall.scaled(),
+        displayLarge   = base.displayLarge.scaled(),
+        headlineLarge  = base.headlineLarge.scaled(),
+        headlineMedium = base.headlineMedium.scaled(),
+        headlineSmall  = base.headlineSmall.scaled(),
+        titleLarge     = base.titleLarge.scaled(),
+        titleMedium    = base.titleMedium.scaled(),
+        titleSmall     = base.titleSmall.scaled(),
+        bodyLarge      = base.bodyLarge.scaled(),
+        bodyMedium     = base.bodyMedium.scaled(),
+        bodySmall      = base.bodySmall.scaled(),
+        labelLarge     = base.labelLarge.scaled(),
+        labelMedium    = base.labelMedium.scaled(),
+        labelSmall     = base.labelSmall.scaled(),
     )
 }
 
@@ -156,12 +183,18 @@ fun scaledTypography(scale: Float): Typography {
 fun VinciTheme(
     isDark: Boolean = true,
     textScale: Float = 1.0f,
+    useCustomFont: Boolean = false,
     content: @Composable () -> Unit,
 ) {
+    val typography = when {
+        textScale != 1.0f -> scaledTypography(textScale, useCustomFont)
+        useCustomFont     -> VinciTypographyPaired
+        else              -> VinciTypography
+    }
     CompositionLocalProvider(LocalIsDark provides isDark) {
         MaterialTheme(
             colorScheme = if (isDark) DarkColorScheme else LightColorScheme,
-            typography  = if (textScale == 1.0f) VinciTypography else scaledTypography(textScale),
+            typography  = typography,
             content     = content,
         )
     }

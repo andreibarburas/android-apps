@@ -37,7 +37,7 @@ class MainActivity : FragmentActivity() {
         setContent {
             val isDark by themeRepository.isDark.collectAsStateWithLifecycle(initialValue = true)
             val textSize by displayPrefs.preferences.collectAsStateWithLifecycle(initialValue = com.brbrs.vinci.ui.theme.DisplayPreferences())
-            VinciTheme(isDark = isDark, textScale = textSizeMultiplier(textSize.textSize)) {
+            VinciTheme(isDark = isDark, textScale = textSizeMultiplier(textSize.textSize), useCustomFont = textSize.useCustomFont) {
                 Surface(modifier = Modifier.fillMaxSize()) {
                     VinciNavGraph(
                         pendingContactId = pendingContactId,

@@ -178,6 +178,25 @@ fun SettingsScreen(
                 }
             }
 
+            Spacer(Modifier.height(8.dp))
+            SettingsCard(isDark) {
+                Row(
+                    modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 12.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.weight(1f)) {
+                        Icon(Icons.Outlined.FontDownload, null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(20.dp))
+                        Spacer(Modifier.width(12.dp))
+                        Column {
+                            Text("DM Serif + Inter Tight", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurface)
+                            Text("Use custom font pairing instead of system fonts", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        }
+                    }
+                    Switch(checked = uiState.useCustomFont, onCheckedChange = viewModel::setUseCustomFont)
+                }
+            }
+
             Spacer(Modifier.height(24.dp))
 
             // Messaging
@@ -417,7 +436,7 @@ fun SettingsScreen(
 
             Spacer(Modifier.height(32.dp))
             Text(
-                "Vinci 1.3.4 · by andrei BARBURAS",
+                "Vinci 1.4.0 · by andrei BARBURAS",
                 style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 textAlign = TextAlign.Center,

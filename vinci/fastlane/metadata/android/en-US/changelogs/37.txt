@@ -1,0 +1,1 @@
+Optional font pairing in Settings > Display: DM Serif Display for headings, Inter Tight for all UI text.

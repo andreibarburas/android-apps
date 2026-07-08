@@ -39,6 +39,7 @@ data class SettingsUiState(
     val cachedAttachmentsSize: Long = 0,
     val cachedAttachmentsCount: Int = 0,
     val textSize: String = "default",
+    val useCustomFont: Boolean = false,
 )
 
 @HiltViewModel
@@ -122,11 +123,16 @@ class SettingsViewModel @Inject constructor(
             cachedAttachmentsSize   = cache.first,
             cachedAttachmentsCount  = cache.second,
             textSize                = display.textSize,
+            useCustomFont           = display.useCustomFont,
         )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), SettingsUiState())
 
     fun setTextSize(size: String) {
         viewModelScope.launch { displayPrefs.setTextSize(size) }
+    }
+
+    fun setUseCustomFont(enabled: Boolean) {
+        viewModelScope.launch { displayPrefs.setUseCustomFont(enabled) }
     }
 
     fun setDefaultCountryCode(code: String) {
