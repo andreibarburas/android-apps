@@ -4,6 +4,13 @@ All notable changes to Blik are documented here.
 
 ---
 
+## [1.1.0] — 2026-07-08
+
+### Added
+- Optional font pairing in Settings → Display: DM Serif Display for headings, Inter Tight for all UI text — toggle it on to bring Blik in line with the rest of the BARBURAS suite
+
+---
+
 ## [1.0.8] — 2026-06-20
 
 ### Fixed

@@ -1,5 +1,6 @@
 package com.brbrs.blik.ui.screens.detail
 
+import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.IntentSenderRequest
 import androidx.activity.result.contract.ActivityResultContracts
@@ -39,6 +40,7 @@ import coil.compose.AsyncImage
 import com.brbrs.blik.data.local.UploadStatus
 import com.brbrs.blik.tasks.TasksOrgHelper
 import com.brbrs.blik.ui.theme.*
+import com.brbrs.blik.util.ShareHelper
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.*
@@ -83,7 +85,61 @@ fun DetailScreen(
 
     var showDeleteDialog by remember { mutableStateOf(false) }
     var showFullscreen   by remember { mutableStateOf(false) }
+    var showShareDialog  by remember { mutableStateOf(false) }
     val isUploaded = entity?.uploadStatus == com.brbrs.blik.data.local.UploadStatus.UPLOADED
+
+    // ── Share dialog ──────────────────────────────────────────────────────────
+    if (showShareDialog && entity != null && !entity.isLocalFileMissing) {
+        AlertDialog(
+            onDismissRequest = { showShareDialog = false },
+            title = { Text("Share screenshot") },
+            text = {
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    OutlinedButton(
+                        onClick = {
+                            showShareDialog = false
+                            ShareHelper.shareImage(context, Uri.parse(entity.localPath), entity.fileName)
+                        },
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(12.dp),
+                    ) {
+                        Icon(Icons.Outlined.Share, null, modifier = Modifier.size(16.dp))
+                        Spacer(Modifier.width(8.dp))
+                        Text("Share original")
+                    }
+                    Button(
+                        onClick = {
+                            showShareDialog = false
+                            vm.showCropScreen()
+                        },
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(12.dp),
+                    ) {
+                        Icon(Icons.Outlined.Crop, null, modifier = Modifier.size(16.dp))
+                        Spacer(Modifier.width(8.dp))
+                        Text("Crop, then share")
+                    }
+                }
+            },
+            confirmButton = {},
+            dismissButton = {
+                TextButton(onClick = { showShareDialog = false }) { Text("Cancel") }
+            },
+        )
+    }
+
+    // ── Crop screen overlay ───────────────────────────────────────────────────
+    if (state.showCropScreen && entity != null) {
+        CropScreen(
+            localPath = entity.localPath,
+            onDismiss = vm::hideCropScreen,
+            onCropped = { bitmap ->
+                vm.hideCropScreen()
+                ShareHelper.shareBitmap(context, bitmap, entity.fileName)
+            },
+        )
+        return   // don't render detail UI beneath crop screen
+    }
 
     // ── Fullscreen image viewer ───────────────────────────────────────────────
     if (showFullscreen && entity != null && !entity.isLocalFileMissing) {
@@ -463,6 +519,15 @@ fun DetailScreen(
                         modifier = Modifier.weight(1f),
                         onClick = vm::runAi,
                     )
+                    // Share
+                    if (!entity.isLocalFileMissing) {
+                        ActionButton(
+                            label   = "Share",
+                            icon    = Icons.Outlined.Share,
+                            modifier = Modifier.weight(1f),
+                            onClick = { showShareDialog = true },
+                        )
+                    }
                 }
 
                 // ── AI error ──────────────────────────────────────────────────

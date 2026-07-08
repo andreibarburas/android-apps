@@ -21,6 +21,7 @@ data class DetailUiState(
     val showNoteDialog: Boolean = false,
     val showTagDialog: Boolean = false,
     val showTaskDialog: Boolean = false,
+    val showCropScreen: Boolean = false,
     /** Non-null when Android 11+ requires a system delete confirmation dialog. */
     val pendingDeleteSender: android.content.IntentSender? = null,
     /** True when pending delete also wipes the Nextcloud copy. */
@@ -40,6 +41,7 @@ class DetailViewModel @Inject constructor(
     private val _aiError     = MutableStateFlow<String?>(null)
     private val _dialogs     = MutableStateFlow(Triple(false, false, false)) // note, tag, task
     private val _pendingDelete = MutableStateFlow<Pair<android.content.IntentSender, Boolean>?>(null)
+    private val _showCrop    = MutableStateFlow(false)
 
     val uiState: StateFlow<DetailUiState> = combine(
         _localPath.flatMapLatest { path ->
@@ -61,6 +63,8 @@ class DetailViewModel @Inject constructor(
             pendingDeleteSender = pending?.first,
             pendingDeleteIncludesNextcloud = pending?.second ?: false,
         )
+    }.combine(_showCrop) { state, crop ->
+        state.copy(showCropScreen = crop)
     }.stateIn(viewModelScope, SharingStarted.Eagerly, DetailUiState())
 
     fun load(localPath: String) {
@@ -117,6 +121,8 @@ class DetailViewModel @Inject constructor(
     fun showTaskDialog()  { _dialogs.value = _dialogs.value.copy(third = true) }
     fun hideTaskDialog()  { _dialogs.value = _dialogs.value.copy(third = false) }
     fun dismissAiError()  { _aiError.value = null }
+    fun showCropScreen()  { _showCrop.value = true }
+    fun hideCropScreen()  { _showCrop.value = false }
 
     fun deleteLocalOnly(onDone: () -> Unit) {
         val entity = uiState.value.entity ?: return

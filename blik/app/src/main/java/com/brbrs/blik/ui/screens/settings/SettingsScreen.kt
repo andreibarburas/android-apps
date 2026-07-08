@@ -369,6 +369,17 @@ fun SettingsScreen(
                 }
             }
 
+            Spacer(Modifier.height(8.dp))
+            SettingsCard(isDark) {
+                ToggleRow(
+                    icon     = Icons.Outlined.TextFields,
+                    title    = "DM Serif & Inter Tight",
+                    subtitle = "Use suite fonts: DM Serif Display for headings, Inter Tight for UI",
+                    checked  = state.useInterTight,
+                    onCheckedChange = vm::toggleInterTight,
+                )
+            }
+
             Spacer(Modifier.height(20.dp))
 
             // ── INTEGRATIONS ──────────────────────────────────────────────────
@@ -455,7 +466,7 @@ fun SettingsScreen(
             }
 
             Spacer(Modifier.height(32.dp))
-            Text("Blik 1.0.8 · by andrei BARBURAS",
+            Text("Blik 1.1.0 · by andrei BARBURAS",
                 style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 textAlign = TextAlign.Center,

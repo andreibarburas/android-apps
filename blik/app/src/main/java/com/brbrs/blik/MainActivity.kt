@@ -34,6 +34,7 @@ class MainActivity : FragmentActivity() {
     @Inject lateinit var webDavClient: WebDavClient
     @Inject lateinit var imageLoader: ImageLoader
     @Inject lateinit var textScalePreference: TextScalePreference
+    @Inject lateinit var settingsRepository: SettingsRepository
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -43,7 +44,10 @@ class MainActivity : FragmentActivity() {
             val textScale by textScalePreference.scale.collectAsStateWithLifecycle(
                 initialValue = TextScale.DEFAULT
             )
-            BlikTheme(isDark = isDark, textScaleMultiplier = textScale.multiplier) {
+            val useInterTight by settingsRepository.useInterTight.collectAsStateWithLifecycle(
+                initialValue = false
+            )
+            BlikTheme(isDark = isDark, textScaleMultiplier = textScale.multiplier, useCustomFont = useInterTight) {
                 BlikNavHost(webDavClient = webDavClient, imageLoader = imageLoader)
             }
         }

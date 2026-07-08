@@ -39,6 +39,7 @@ data class SettingsUiState(
     val tasksEnabled: Boolean    = false,
     val tasksInstalled: Boolean  = false,
     val textScale: com.brbrs.blik.ui.theme.TextScale = com.brbrs.blik.ui.theme.TextScale.DEFAULT,
+    val useInterTight: Boolean   = false,
     val loggedOut: Boolean       = false,
 )
 
@@ -99,6 +100,8 @@ class SettingsViewModel @Inject constructor(
         state.copy(loggedOut = out)
     }.combine(textScalePreference.scale) { state, scale ->
         state.copy(textScale = scale)
+    }.combine(settings.useInterTight) { state, interTight ->
+        state.copy(useInterTight = interTight)
     }.stateIn(viewModelScope, SharingStarted.Eagerly, SettingsUiState())
 
     fun setLocalFolder(v: String)     = viewModelScope.launch { settings.set(SettingsRepository.KEY_LOCAL_FOLDER, v) }
@@ -120,6 +123,10 @@ class SettingsViewModel @Inject constructor(
 
     fun toggleTasks(enabled: Boolean) {
         viewModelScope.launch { settings.set(SettingsRepository.KEY_TASKS_ENABLED, enabled) }
+    }
+
+    fun toggleInterTight(enabled: Boolean) {
+        viewModelScope.launch { settings.set(SettingsRepository.KEY_USE_INTER_TIGHT, enabled) }
     }
 
     fun setTextScale(scale: TextScale) {

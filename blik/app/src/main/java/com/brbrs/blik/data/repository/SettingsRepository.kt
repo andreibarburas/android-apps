@@ -29,6 +29,7 @@ class SettingsRepository @Inject constructor(
         val KEY_AUTO_CATEGORISE   = booleanPreferencesKey("auto_categorize")
         val KEY_AUTO_AI_DESC      = booleanPreferencesKey("auto_ai_desc")
         val KEY_TASKS_ENABLED     = booleanPreferencesKey("tasks_enabled")
+        val KEY_USE_INTER_TIGHT   = booleanPreferencesKey("use_inter_tight")
     }
 
     val localFolder: Flow<String>       = dataStore.data.map { it[KEY_LOCAL_FOLDER] ?: "" }
@@ -44,6 +45,7 @@ class SettingsRepository @Inject constructor(
     val autoCategorize: Flow<Boolean> = dataStore.data.map { it[KEY_AUTO_CATEGORISE] ?: false }
     val autoAiDesc: Flow<Boolean>     = dataStore.data.map { it[KEY_AUTO_AI_DESC] ?: false }
     val tasksEnabled: Flow<Boolean>   = dataStore.data.map { it[KEY_TASKS_ENABLED] ?: false }
+    val useInterTight: Flow<Boolean>  = dataStore.data.map { it[KEY_USE_INTER_TIGHT] ?: false }
 
     suspend fun set(key: Preferences.Key<String>, value: String) {
         dataStore.edit { it[key] = value }
