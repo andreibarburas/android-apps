@@ -4,6 +4,13 @@ All notable changes to Blik are documented here.
 
 ---
 
+## [1.1.1] — 2026-07-09
+
+### Fixed
+- Crop editor no longer conflicts with system gestures; the image canvas is now inset from all screen edges, keeping the corner handles well within the safe gesture zone
+
+---
+
 ## [1.1.0] — 2026-07-08
 
 ### Added

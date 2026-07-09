@@ -126,7 +126,12 @@ private fun CropEditor(
 
     Box(modifier = Modifier.fillMaxSize()) {
 
-        // ── Canvas: image + crop overlay ──────────────────────────────────────
+        // ── Canvas: image + crop overlay (inset to 90% to avoid system gesture zones) ──
+        Box(
+            modifier = Modifier
+                .fillMaxSize(0.9f)
+                .align(Alignment.Center)
+        ) {
         Canvas(
             modifier = Modifier
                 .fillMaxSize()
@@ -140,7 +145,7 @@ private fun CropEditor(
                             change.consume()
                             cropRect = moveCropRect(cropRect, dragHandle, drag, imageDisplayRect)
                         },
-                        onDragEnd   = { dragHandle = null },
+                        onDragEnd    = { dragHandle = null },
                         onDragCancel = { dragHandle = null },
                     )
                 }
@@ -196,19 +201,26 @@ private fun CropEditor(
                         strokeWidth = 1.dp.toPx())
                 }
 
-                // Corner handles
+                // Corner + edge-midpoint handles (8 total)
                 val hr = HANDLE_RADIUS * 0.55f
+                val mx = (cropRect.left + cropRect.right)  / 2f
+                val my = (cropRect.top  + cropRect.bottom) / 2f
                 listOf(
-                    Offset(cropRect.left,  cropRect.top),
-                    Offset(cropRect.right, cropRect.top),
-                    Offset(cropRect.left,  cropRect.bottom),
-                    Offset(cropRect.right, cropRect.bottom),
+                    Offset(cropRect.left,  cropRect.top),    // TL
+                    Offset(cropRect.right, cropRect.top),    // TR
+                    Offset(cropRect.left,  cropRect.bottom), // BL
+                    Offset(cropRect.right, cropRect.bottom), // BR
+                    Offset(mx,             cropRect.top),    // TM
+                    Offset(mx,             cropRect.bottom), // BM
+                    Offset(cropRect.left,  my),              // ML
+                    Offset(cropRect.right, my),              // MR
                 ).forEach { c ->
-                    drawCircle(primary,  radius = hr,        center = c)
-                    drawCircle(Color.White, radius = hr * 0.45f, center = c)
+                    drawCircle(primary,     radius = hr,          center = c)
+                    drawCircle(Color.White, radius = hr * 0.45f,  center = c)
                 }
             }
         }
+        } // end inset Box
 
         // ── Top bar ───────────────────────────────────────────────────────────
         Row(
@@ -260,17 +272,24 @@ private fun CropEditor(
     }
 }
 
-private enum class DragHandle { TL, TR, BL, BR }
+private enum class DragHandle { TL, TR, BL, BR, TM, BM, ML, MR, MOVE }
 
-/** Returns the corner handle under [pos], or null if none is hit. */
+/** Corner and edge-midpoint handles take priority; anything inside the rect is a MOVE drag. */
 private fun hitTest(pos: Offset, crop: Rect): DragHandle? {
-    val r = HANDLE_RADIUS * 2.5f
+    val r  = HANDLE_RADIUS * 2.5f
+    val mx = (crop.left + crop.right)  / 2f
+    val my = (crop.top  + crop.bottom) / 2f
     return when {
         (pos - Offset(crop.left,  crop.top   )).getDistance() < r -> DragHandle.TL
         (pos - Offset(crop.right, crop.top   )).getDistance() < r -> DragHandle.TR
         (pos - Offset(crop.left,  crop.bottom)).getDistance() < r -> DragHandle.BL
         (pos - Offset(crop.right, crop.bottom)).getDistance() < r -> DragHandle.BR
-        else -> null
+        (pos - Offset(mx,         crop.top   )).getDistance() < r -> DragHandle.TM
+        (pos - Offset(mx,         crop.bottom)).getDistance() < r -> DragHandle.BM
+        (pos - Offset(crop.left,  my         )).getDistance() < r -> DragHandle.ML
+        (pos - Offset(crop.right, my         )).getDistance() < r -> DragHandle.MR
+        crop.contains(pos)                                         -> DragHandle.MOVE
+        else                                                       -> null
     }
 }
 
@@ -280,7 +299,7 @@ private fun moveCropRect(
     drag: Offset,
     bounds: Rect,
 ): Rect {
-    if (handle == null) return current   // no handle hit — ignore drag
+    if (handle == null) return current
 
     var l = current.left
     var t = current.top
@@ -290,10 +309,15 @@ private fun moveCropRect(
     val dy = drag.y
 
     when (handle) {
-        DragHandle.TL -> { l += dx; t += dy }
-        DragHandle.TR -> { r += dx; t += dy }
-        DragHandle.BL -> { l += dx; b += dy }
-        DragHandle.BR -> { r += dx; b += dy }
+        DragHandle.TL   -> { l += dx; t += dy }
+        DragHandle.TR   -> { r += dx; t += dy }
+        DragHandle.BL   -> { l += dx; b += dy }
+        DragHandle.BR   -> { r += dx; b += dy }
+        DragHandle.TM   -> { t += dy }
+        DragHandle.BM   -> { b += dy }
+        DragHandle.ML   -> { l += dx }
+        DragHandle.MR   -> { r += dx }
+        DragHandle.MOVE -> { l += dx; t += dy; r += dx; b += dy }
     }
 
     // Clamp to image bounds and enforce minimum size
@@ -301,6 +325,16 @@ private fun moveCropRect(
     t = t.coerceIn(bounds.top,  b - MIN_CROP_PX)
     r = r.coerceIn(l + MIN_CROP_PX, bounds.right)
     b = b.coerceIn(t + MIN_CROP_PX, bounds.bottom)
+
+    // For MOVE: keep the rect fully inside bounds without resizing it
+    if (handle == DragHandle.MOVE) {
+        val w = r - l
+        val h = b - t
+        l = l.coerceIn(bounds.left, bounds.right  - w)
+        t = t.coerceIn(bounds.top,  bounds.bottom - h)
+        r = l + w
+        b = t + h
+    }
 
     return Rect(l, t, r, b)
 }
