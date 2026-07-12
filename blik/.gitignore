@@ -1,0 +1,38 @@
+# Built output
+build/
+app/build/
+
+# Gradle
+.gradle/
+gradle-wrapper.jar
+local.properties
+
+# Android Studio / IntelliJ
+.idea/
+*.iml
+*.iws
+*.ipr
+captures/
+.externalNativeBuild/
+.cxx/
+
+# Sensitive files — never commit these
+*.jks
+*.keystore
+*.apk
+*.aab
+google-services.json
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Kotlin
+*.class
+
+# Dependency lock files (optional — remove if you want to commit them)
+*.lock
