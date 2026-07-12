@@ -1,5 +1,0 @@
--keepattributes *Annotation*
--keep class com.brbrs.bookmarks.data.local.** { *; }
--keep class org.json.** { *; }
--dontwarn okhttp3.**
--dontwarn okio.**
