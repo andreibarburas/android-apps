@@ -1,0 +1,2 @@
+-keep class com.brbrs.vinci.** { *; }
+-keepattributes *Annotation*

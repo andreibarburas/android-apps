@@ -1,0 +1,1 @@
+Added text size setting, tag filters, bulk star/unstar, Markdown export, privacy policy link, onboarding screen, and GPLv3 license. Fixed unknown-number sync, WhatsApp/Signal icons, contact detail gradient seam, and address book URL discovery.

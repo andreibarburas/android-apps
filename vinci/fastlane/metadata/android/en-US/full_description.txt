@@ -1,0 +1,39 @@
+Vinci is a personal CRM for Android that syncs everything to your own Nextcloud. Stay on top of your relationships without giving your data to anyone else.
+
+LOG INTERACTIONS
+Keep a record of every call, meeting, email, message, or social media interaction. Add type, reason, notes, outcome, and tags. Set a follow-up reminder that syncs to Tasks.org.
+
+STAY ON TOP OF PEOPLE
+The home screen shows starred contacts, recent interactions, and upcoming birthdays at a glance. Never forget who you were supposed to call back.
+
+CONTACT DETAILS
+See all contact info alongside your full interaction history. Tap to call, message, email, or open WhatsApp and Signal directly from the contact screen.
+
+YOUR DATA, YOUR NEXTCLOUD
+All interaction logs, follow-ups, and attachments are stored on your own Nextcloud via WebDAV. Contacts are read from DAVx5. Vinci never connects to any server other than yours.
+
+PRIVACY FIRST
+No analytics. No crash reporting. No ads. No tracking of any kind.
+
+FEATURES
+- Interaction log with type, reason, notes, outcome, and tags
+- Social Media interaction type with platform picker (LinkedIn, Instagram, GitHub, and more)
+- Starred contacts for quick access
+- Follow-up reminders via Tasks.org / CalDAV
+- Birthday reminders on the home screen
+- Tag filtering on the Contacts tab
+- Bulk star/unstar via long-press
+- Per-contact Markdown export
+- File attachments stored on Nextcloud
+- WhatsApp and Signal deep links
+- Text size setting (Small / Default / Large / Extra Large)
+- Biometric app lock
+- Full dark mode support
+- Nextcloud Login Flow v2
+
+REQUIREMENTS
+- Nextcloud instance (self-hosted)
+- DAVx5 or compatible CardDAV app
+- Tasks.org (optional, for follow-up reminders)
+
+Open source. GPLv3. Free forever.

@@ -1,0 +1,1 @@
+Added: Social Media interaction type with platform picker and brand icons.

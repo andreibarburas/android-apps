@@ -1,0 +1,1 @@
+Fixed: Social Media platform picker now renders correctly (replaced LazyRow with FlowRow). Fixed duplicate @OptIn annotation.

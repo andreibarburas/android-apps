@@ -1,0 +1,1 @@
+Fixed: Social Media interactions now correctly save and display the selected platform.

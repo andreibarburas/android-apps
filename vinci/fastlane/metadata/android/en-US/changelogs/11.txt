@@ -1,0 +1,1 @@
+Fixed: deleting an interaction now correctly resets the contact's last-interaction timestamp.

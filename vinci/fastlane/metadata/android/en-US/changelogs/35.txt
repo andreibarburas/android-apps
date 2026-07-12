@@ -1,0 +1,1 @@
+Multi-device restore, deleted interaction sync to Nextcloud, starred contacts sync button, and Snackbar notifications for restore and sync actions.

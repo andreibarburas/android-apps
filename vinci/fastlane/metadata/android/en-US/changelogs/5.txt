@@ -1,0 +1,1 @@
+Fixed: contacts starting with a digit now appear under a # section; # added to the alphabet sidebar.

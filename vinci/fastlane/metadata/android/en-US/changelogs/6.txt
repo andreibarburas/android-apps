@@ -1,0 +1,1 @@
+Fixed: social links (LinkedIn, Instagram, GitHub) now display correctly on the contact detail screen. Fixed CardDAV UID resolution and WhatsApp UID conflict in multi-account setups.

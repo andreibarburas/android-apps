@@ -1,0 +1,1 @@
+Fixed: interactions with unknown phone numbers now upload to Nextcloud correctly. Sync button retries previously unsynced logs.

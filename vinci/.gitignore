@@ -1,0 +1,36 @@
+# Android
+*.apk
+*.aab
+*.ap_
+*.dex
+
+# Build
+/build/
+/app/build/
+
+# Gradle
+.gradle/
+gradle-app.setting
+!gradle-wrapper.jar
+
+# Local config
+local.properties
+
+# IDE
+.idea/
+*.iml
+*.iws
+*.ipr
+.DS_Store
+
+# Keystore / signing
+*.keystore
+*.jks
+keystore.properties
+
+# Proguard
+/proguard/
+
+# Generated
+gen/
+out/

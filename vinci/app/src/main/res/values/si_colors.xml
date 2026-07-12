@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="si_facebook">#1877F2</color>
+    <color name="si_github">#181717</color>
+    <color name="si_instagram">#E4405F</color>
+    <color name="si_xing">#006567</color>
+    <color name="si_pinterest">#BD081C</color>
+    <color name="si_qzone">#FFCE00</color>
+    <color name="si_tumblr">#35465C</color>
+    <color name="si_x">#000000</color>
+    <color name="si_wechat">#07C160</color>
+    <color name="si_youtube">#FF0000</color>
+    <color name="si_mastodon">#6364FF</color>
+    <color name="si_diaspora">#000000</color>
+    <color name="si_nextcloud">#0082C9</color>
+    <color name="si_linkedin">#0A66C2</color>
+    <color name="si_reddit">#FF4500</color>
+</resources>
