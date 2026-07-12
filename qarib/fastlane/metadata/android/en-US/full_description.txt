@@ -1,0 +1,18 @@
+Qarib (قريب — Arabic for "nearby") is a privacy-first places app for saving spots you want to visit and getting notified when you're close.
+
+FEATURES
+• Save places with name, category, photo, and personal note
+• Search via OpenStreetMap — no Google API key required
+• Map and list view (sorted by country)
+• Geofence notifications when you enter a place's radius
+• Configurable radius: 100 m to 5 km
+• Nextcloud WebDAV sync (Login Flow v2)
+• GPX import
+• Directions handed off to your preferred maps app
+• Biometric app lock
+• Dark and light theme
+
+PRIVACY
+All location processing is on-device only. No data is sent to any third-party server. Sync is directly to your own Nextcloud instance.
+
+Open source (GPLv3) — source code on GitHub.
