@@ -114,6 +114,13 @@ private val MIGRATION_6_7 = object : Migration(6, 7) {
     }
 }
 
+// v7 → v8: add participants to call_logs for multi-contact interactions (e.g. group calls).
+private val MIGRATION_7_8 = object : Migration(7, 8) {
+    override fun migrate(db: SupportSQLiteDatabase) {
+        db.execSQL("ALTER TABLE call_logs ADD COLUMN participants TEXT NOT NULL DEFAULT '[]'")
+    }
+}
+
 @Module
 @InstallIn(SingletonComponent::class)
 object AppModule {
@@ -128,6 +135,7 @@ object AppModule {
                 MIGRATION_4_5,
                 MIGRATION_5_6,
                 MIGRATION_6_7,
+                MIGRATION_7_8,
             )
             .build()
 
@@ -156,7 +164,7 @@ object AppModule {
             .addInterceptor { chain ->
                 chain.proceed(
                     chain.request().newBuilder()
-                        .header("User-Agent", "Vinci/1.4.0 (Android)")
+                        .header("User-Agent", "Vinci/1.5.3 (Android)")
                         .build()
                 )
             }

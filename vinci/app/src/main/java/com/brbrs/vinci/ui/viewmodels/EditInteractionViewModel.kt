@@ -17,7 +17,10 @@ import com.brbrs.vinci.tasks.TasksPreference
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.*
+import com.brbrs.vinci.util.InteractionParticipant
 import com.brbrs.vinci.util.normalizePhone
+import com.brbrs.vinci.util.parseParticipants
+import com.brbrs.vinci.util.serializeParticipants
 import org.json.JSONArray
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -51,6 +54,12 @@ data class EditInteractionUiState(
     /** The specific social platform chosen when interactionType == "Social Media",
      *  e.g. "linkedin", "instagram". Empty means none chosen yet. */
     val selectedSocialPlatform: String = "",
+    // Additional people in this interaction (e.g. group calls) beyond the primary contact
+    val participants: List<InteractionParticipant> = emptyList(),
+    val participantQuery: String = "",
+    val participantSearchResults: List<ContactEntity> = emptyList(),
+    // uid -> photoUri, so participant chips can show a picture without a lookup on every recomposition
+    val participantPhotos: Map<String, String> = emptyMap(),
 )
 
 @HiltViewModel
@@ -95,7 +104,20 @@ class EditInteractionViewModel @Inject constructor(
                     interactionTimestamp = log.callTimestamp,
                     tasksEnabled         = tasksOn,
                     tasksInstalled       = TasksOrgHelper.isInstalled(context),
+                    participants         = parseParticipants(log.participants),
                 )
+            }
+
+            // Resolve photos for participants already saved on this log (added in a previous session)
+            val loadedParticipants = parseParticipants(log.participants)
+            if (loadedParticipants.isNotEmpty()) {
+                val photos = loadedParticipants
+                    .filter { it.uid.isNotBlank() }
+                    .mapNotNull { p -> contactDao.getContactByUid(p.uid)?.let { p.uid to it.photoUri } }
+                    .toMap()
+                if (photos.isNotEmpty()) {
+                    _uiState.update { it.copy(participantPhotos = it.participantPhotos + photos) }
+                }
             }
 
             // Fetch social platforms from vCard — contact is now guaranteed to be loaded
@@ -156,6 +178,53 @@ class EditInteractionViewModel @Inject constructor(
     fun showDeleteConfirm()                     { _uiState.update { it.copy(showDeleteConfirm = true) } }
     fun dismissDeleteConfirm()                  { _uiState.update { it.copy(showDeleteConfirm = false) } }
 
+    // -- Participants (extra people in this interaction, e.g. group calls) --------------
+
+    fun onParticipantQueryChanged(query: String) {
+        _uiState.update { it.copy(participantQuery = query) }
+        viewModelScope.launch {
+            val state = _uiState.value
+            if (query.isBlank()) {
+                _uiState.update { it.copy(participantSearchResults = emptyList()) }
+                return@launch
+            }
+            val existingUids = state.participants.mapNotNull { it.uid.ifBlank { null } }.toSet()
+            val results = contactDao.searchContacts(query).first()
+                .filter { c -> c.id != state.contact?.id && c.cardavUid !in existingUids }
+                .take(8)
+            _uiState.update { it.copy(participantSearchResults = results) }
+        }
+    }
+
+    fun addParticipantContact(contact: ContactEntity) {
+        _uiState.update {
+            if (it.participants.any { p -> p.uid.isNotBlank() && p.uid == contact.cardavUid }) return@update it
+            it.copy(
+                participants = it.participants + InteractionParticipant(uid = contact.cardavUid, name = contact.displayName),
+                participantQuery = "",
+                participantSearchResults = emptyList(),
+                participantPhotos = it.participantPhotos + (contact.cardavUid to contact.photoUri),
+            )
+        }
+    }
+
+    fun addParticipantFreeText(name: String) {
+        val trimmed = name.trim()
+        if (trimmed.isBlank()) return
+        _uiState.update {
+            if (it.participants.any { p -> p.name.equals(trimmed, ignoreCase = true) }) return@update it
+            it.copy(
+                participants = it.participants + InteractionParticipant(name = trimmed),
+                participantQuery = "",
+                participantSearchResults = emptyList(),
+            )
+        }
+    }
+
+    fun removeParticipant(participant: InteractionParticipant) {
+        _uiState.update { it.copy(participants = it.participants - participant) }
+    }
+
     fun save() {
         val state = _uiState.value
         val log   = state.log ?: return
@@ -170,11 +239,22 @@ class EditInteractionViewModel @Inject constructor(
                 outcome          = state.outcome,
                 notes            = state.notes,
                 tags             = JSONArray(state.selectedTags).toString(),
+                participants     = serializeParticipants(state.participants),
                 followUpDays     = if (state.followUpEnabled) state.followUpDays else 0,
                 callTimestamp    = state.interactionTimestamp,
                 isSynced         = false,
             )
             callLogDao.updateLog(updated)
+
+            // Bump lastCallTimestamp for any participants who are existing contacts too,
+            // so a group call also surfaces in their "recent contacts" on Home.
+            state.participants.forEach { participant ->
+                if (participant.uid.isNotBlank() && participant.uid != state.contact?.cardavUid) {
+                    contactDao.getContactByUid(participant.uid)?.let {
+                        contactDao.updateLastCall(it.id, state.interactionTimestamp)
+                    }
+                }
+            }
 
             if (state.followUpEnabled && state.log.followUpDays == 0) {
                 val contact = state.contact

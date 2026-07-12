@@ -14,8 +14,8 @@ android {
         applicationId = "com.brbrs.vinci"
         minSdk = 28
         targetSdk = 35
-        versionCode = 37
-        versionName = "1.4.0"
+        versionCode = 41
+        versionName = "1.5.3"
     }
 
     buildTypes {

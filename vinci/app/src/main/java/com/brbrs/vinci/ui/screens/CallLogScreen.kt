@@ -271,6 +271,21 @@ fun CallLogScreen(
                     }
                 }
 
+                // People — add extra participants for group calls / joint meetings
+                FormSection(label = "People") {
+                    com.brbrs.vinci.ui.components.ParticipantsPicker(
+                        participants  = uiState.participants,
+                        query         = uiState.participantQuery,
+                        searchResults = uiState.participantSearchResults,
+                        isDark        = isDark,
+                        photosByUid   = uiState.participantPhotos,
+                        onQueryChanged = viewModel::onParticipantQueryChanged,
+                        onAddContact   = viewModel::addParticipantContact,
+                        onAddFreeText  = viewModel::addParticipantFreeText,
+                        onRemove       = viewModel::removeParticipant,
+                    )
+                }
+
                 // Reason
                 FormSection(label = "Reason") {
                     ChipRow(

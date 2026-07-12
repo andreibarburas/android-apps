@@ -187,6 +187,13 @@ class ContactsListViewModel @Inject constructor(
             runCatching { webDavRepository.clearAddressBookUrlCache() }
             runCatching { contactsRepository.syncFromDevice() }
             runCatching { webDavRepository.syncPendingLogs() }
+            // Pull down anything logged elsewhere (e.g. the Nextcloud web app) that isn't
+            // in the local database yet. restoreFromNextcloud() only inserts what's missing --
+            // it never overwrites or deletes -- so it's safe to run on every regular sync,
+            // not just from the explicit "Restore" action in Settings.
+            runCatching { webDavRepository.restoreFromNextcloud() }
+            // Cleans up duplicate rows left behind by a now-fixed id bug (see stableLogId).
+            runCatching { webDavRepository.dedupeCallLogs() }
             _isSyncing.value = false
             loadUnknownRecentCalls()
         }

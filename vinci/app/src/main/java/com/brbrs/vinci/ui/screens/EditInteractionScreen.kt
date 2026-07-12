@@ -224,6 +224,20 @@ fun EditInteractionScreen(
                     }
                 }
 
+                EditFormSection(label = "People") {
+                    com.brbrs.vinci.ui.components.ParticipantsPicker(
+                        participants  = uiState.participants,
+                        query         = uiState.participantQuery,
+                        searchResults = uiState.participantSearchResults,
+                        isDark        = isDark,
+                        photosByUid   = uiState.participantPhotos,
+                        onQueryChanged = viewModel::onParticipantQueryChanged,
+                        onAddContact   = viewModel::addParticipantContact,
+                        onAddFreeText  = viewModel::addParticipantFreeText,
+                        onRemove       = viewModel::removeParticipant,
+                    )
+                }
+
                 EditFormSection(label = "Reason") {
                     EditChipRow(options = INTERACTION_REASONS, selected = uiState.reason, onSelect = viewModel::onReasonSelected)
                 }

@@ -60,9 +60,27 @@ class ContactDetailViewModel @Inject constructor(
     private val _remoteSocialLinks   = MutableStateFlow<String?>(null) // null = not yet fetched
     private val _recentInteractions  = MutableStateFlow<List<RecentInteraction>>(emptyList())
 
+    private val contactFlow = flow { emit(contactDao.getContactById(contactId)) }
+
+    /**
+     * Interactions logged against this contact directly, plus interactions where this contact
+     * was added as an extra participant (e.g. a group call logged from someone else's profile).
+     */
+    private val mergedLogsFlow: Flow<List<CallLogEntity>> = contactFlow.flatMapLatest { contact ->
+        val primaryFlow = callLogDao.getLogsForContact(contactId)
+        val participantFlow = if (contact != null && contact.cardavUid.isNotBlank()) {
+            callLogDao.getLogsAsParticipant(contact.cardavUid)
+        } else {
+            flowOf(emptyList())
+        }
+        combine(primaryFlow, participantFlow) { primary, asParticipant ->
+            (primary + asParticipant).distinctBy { it.id }.sortedByDescending { it.callTimestamp }
+        }
+    }
+
     val uiState: StateFlow<ContactDetailUiState> = combine(
-        flow { emit(contactDao.getContactById(contactId)) },
-        callLogDao.getLogsForContact(contactId),
+        contactFlow,
+        mergedLogsFlow,
         combine(_showAllLogs, _showAllInteractions) { a, b -> a to b },
         combine(_recentInteractions, _remoteSocialLinks) { i, s -> i to s },
         displayPrefs.preferences,
@@ -170,7 +188,11 @@ class ContactDetailViewModel @Inject constructor(
     fun exportContactHistory() {
         viewModelScope.launch {
             val contact = uiState.value.contact ?: return@launch
-            val logs = callLogDao.getLogsForContact(contactId).first()
+            val primary = callLogDao.getLogsForContact(contactId).first()
+            val asParticipant = if (contact.cardavUid.isNotBlank()) {
+                callLogDao.getLogsAsParticipant(contact.cardavUid).first()
+            } else emptyList()
+            val logs = (primary + asParticipant).distinctBy { it.id }.sortedByDescending { it.callTimestamp }
             val dateFmt = java.text.SimpleDateFormat("yyyy-MM-dd HH:mm", java.util.Locale.getDefault())
             val sb = StringBuilder()
             sb.append("# ${contact.displayName} — interaction history\n\n")
@@ -178,6 +200,7 @@ class ContactDetailViewModel @Inject constructor(
             logs.forEach { log ->
                 sb.append("## ${dateFmt.format(java.util.Date(log.callTimestamp))}\n")
                 sb.append("- Type: ${log.interactionType}\n")
+                if (log.contactId != contactId) sb.append("- With: ${log.contactName} (${contact.displayName} was a participant)\n")
                 if (log.reason.isNotBlank())  sb.append("- Reason: ${log.reason}\n")
                 if (log.outcome.isNotBlank()) sb.append("- Outcome: ${log.outcome}\n")
                 val tags = try {

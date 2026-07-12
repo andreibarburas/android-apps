@@ -7,6 +7,8 @@ import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -29,6 +31,8 @@ import coil.compose.AsyncImage
 import com.brbrs.vinci.data.CallLogEntity
 import com.brbrs.vinci.data.ContactEntity
 import com.brbrs.vinci.ui.theme.*
+import com.brbrs.vinci.util.InteractionParticipant
+import com.brbrs.vinci.util.parseParticipants
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -347,6 +351,8 @@ fun RecentInteractionCard(
         com.brbrs.vinci.ui.components.SOCIAL_PLATFORMS.firstOrNull { it.key == key && it.drawableRes != 0 }
     } else null
 
+    val participantCount = parseParticipants(log.participants).size
+
     Box(
         modifier = Modifier
             .padding(horizontal = 16.dp, vertical = 3.dp)
@@ -384,13 +390,31 @@ fun RecentInteractionCard(
                         modifier = Modifier.size(18.dp),
                     )
                 } else {
-                    val typeIcon = when (log.interactionType) {
-                        "Meeting" -> Icons.Outlined.Groups
-                        "Email"   -> Icons.Outlined.Email
-                        "Message" -> Icons.Outlined.Message
+                    val typeIcon = when {
+                        participantCount > 0    -> Icons.Outlined.Groups
+                        log.interactionType == "Meeting" -> Icons.Outlined.Groups
+                        log.interactionType == "Email"   -> Icons.Outlined.Email
+                        log.interactionType == "Message" -> Icons.Outlined.Message
                         else      -> Icons.Outlined.Call
                     }
                     Icon(typeIcon, null, tint = CyanPrimary, modifier = Modifier.size(18.dp))
+                }
+                if (participantCount > 0) {
+                    Box(
+                        modifier = Modifier
+                            .align(Alignment.BottomEnd)
+                            .size(15.dp)
+                            .clip(CircleShape)
+                            .background(AmberWarn)
+                            .border(1.dp, if (isDark) NavyMid else LightSurface, CircleShape),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        Text(
+                            "+$participantCount",
+                            style = MaterialTheme.typography.labelSmall.copy(fontSize = androidx.compose.ui.unit.TextUnit(8f, androidx.compose.ui.unit.TextUnitType.Sp)),
+                            color = NavyDeep,
+                        )
+                    }
                 }
             }
             Spacer(Modifier.width(12.dp))
@@ -404,6 +428,7 @@ fun RecentInteractionCard(
                         else log.interactionType
                         append(displayType)
                         if (log.reason.isNotBlank()) append(" · ${log.reason}")
+                        if (participantCount > 0) append(" · +$participantCount ${if (participantCount == 1) "person" else "people"}")
                     },
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -549,5 +574,143 @@ fun relativeTime(epochMs: Long): String {
         days == 1L -> "yesterday"
         days < 7   -> "${days}d ago"
         else       -> SimpleDateFormat("yyyy/MM/dd", Locale.getDefault()).format(Date(epochMs))
+    }
+}
+
+// ── Participants picker (Log / Edit interaction — add extra people, e.g. group calls) ─────
+
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+fun ParticipantsPicker(
+    participants: List<InteractionParticipant>,
+    query: String,
+    searchResults: List<ContactEntity>,
+    isDark: Boolean,
+    photosByUid: Map<String, String> = emptyMap(),
+    onQueryChanged: (String) -> Unit,
+    onAddContact: (ContactEntity) -> Unit,
+    onAddFreeText: (String) -> Unit,
+    onRemove: (InteractionParticipant) -> Unit,
+) {
+    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        if (participants.isNotEmpty()) {
+            FlowRow(horizontalArrangement = Arrangement.spacedBy(14.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                participants.forEach { participant ->
+                    ParticipantChip(
+                        participant = participant,
+                        photoUri    = photosByUid[participant.uid].orEmpty(),
+                        isDark      = isDark,
+                        onRemove    = { onRemove(participant) },
+                    )
+                }
+            }
+        }
+
+        OutlinedTextField(
+            value = query,
+            onValueChange = onQueryChanged,
+            placeholder = { Text("Search contacts or type a name...", color = MaterialTheme.colorScheme.onSurfaceVariant) },
+            singleLine = true,
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(12.dp),
+            leadingIcon = { Icon(Icons.Outlined.PersonAdd, null, tint = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.size(18.dp)) },
+            colors = OutlinedTextFieldDefaults.colors(
+                focusedBorderColor   = MaterialTheme.colorScheme.primary,
+                unfocusedBorderColor = MaterialTheme.colorScheme.outline,
+                focusedTextColor     = MaterialTheme.colorScheme.onBackground,
+                unfocusedTextColor   = MaterialTheme.colorScheme.onBackground,
+                cursorColor          = MaterialTheme.colorScheme.primary,
+            ),
+        )
+
+        if (query.isNotBlank()) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .vinciCard(isDark = isDark)
+                    .padding(vertical = 4.dp),
+            ) {
+                searchResults.forEach { contact ->
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable { onAddContact(contact) }
+                            .padding(horizontal = 12.dp, vertical = 8.dp),
+                    ) {
+                        ContactAvatar(photoUri = contact.photoUri, displayName = contact.displayName, size = 28, shape = CircleShape)
+                        Spacer(Modifier.width(10.dp))
+                        Text(contact.displayName, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurface,
+                            maxLines = 1, overflow = TextOverflow.Ellipsis)
+                    }
+                }
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable { onAddFreeText(query) }
+                        .padding(horizontal = 12.dp, vertical = 8.dp),
+                ) {
+                    Box(
+                        modifier = Modifier.size(28.dp).clip(CircleShape)
+                            .background(CyanPrimary.copy(alpha = 0.15f)),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        Icon(Icons.Outlined.Add, null, tint = CyanPrimary, modifier = Modifier.size(16.dp))
+                    }
+                    Spacer(Modifier.width(10.dp))
+                    Text("Add \"$query\" as new", style = MaterialTheme.typography.bodyMedium, color = CyanPrimary,
+                        maxLines = 1, overflow = TextOverflow.Ellipsis)
+                }
+            }
+        }
+    }
+}
+
+/**
+ * A single added participant, styled like [StarredGridCell] — avatar with name below —
+ * but with a small circular "remove" badge peeking out of the avatar's corner instead of a star,
+ * so it reads as "tap to un-star this person from the interaction" rather than a plain delete button.
+ */
+@Composable
+private fun ParticipantChip(
+    participant: InteractionParticipant,
+    photoUri: String,
+    isDark: Boolean,
+    onRemove: () -> Unit,
+) {
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier.width(70.dp),
+    ) {
+        Box(contentAlignment = Alignment.TopEnd) {
+            ContactAvatar(photoUri = photoUri, displayName = participant.name, size = 52, shape = CircleShape)
+            Box(
+                modifier = Modifier
+                    .offset(x = 5.dp, y = (-5).dp)
+                    .size(20.dp)
+                    .clip(CircleShape)
+                    .background(if (isDark) NavyMid else LightSurface)
+                    .border(1.5.dp, MaterialTheme.colorScheme.error.copy(alpha = 0.4f), CircleShape)
+                    .clickable(onClick = onRemove),
+                contentAlignment = Alignment.Center,
+            ) {
+                Icon(
+                    Icons.Outlined.Close,
+                    contentDescription = "Remove ${participant.name}",
+                    tint = MaterialTheme.colorScheme.error,
+                    modifier = Modifier.size(12.dp),
+                )
+            }
+        }
+        Spacer(Modifier.height(6.dp))
+        Text(
+            participant.name,
+            style = MaterialTheme.typography.labelMedium,
+            color = MaterialTheme.colorScheme.onSurface,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+            textAlign = TextAlign.Center,
+        )
     }
 }

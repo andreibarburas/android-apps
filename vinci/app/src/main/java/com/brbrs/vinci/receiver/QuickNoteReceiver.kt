@@ -9,6 +9,7 @@ import android.provider.ContactsContract
 import com.brbrs.vinci.data.CallLogDao
 import com.brbrs.vinci.data.CallLogEntity
 import com.brbrs.vinci.util.normalizePhone
+import com.brbrs.vinci.util.stableLogId
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -47,14 +48,16 @@ class QuickNoteReceiver : BroadcastReceiver() {
                         resolveContactName(context, contactId) ?: contactName
                     } else contactName
 
+                    val now = System.currentTimeMillis()
                     callLogDao.insertLog(
                         CallLogEntity(
+                            id              = stableLogId(now),
                             contactId       = contactId,
                             contactUid      = "",
                             contactName     = resolvedName,
                             phoneNumber     = phone,
                             normalizedPhone = normalizePhone(phone),
-                            callTimestamp   = System.currentTimeMillis(),
+                            callTimestamp   = now,
                             durationSeconds = duration,
                             isOutgoing      = isOutgoing,
                             interactionType = "Call",

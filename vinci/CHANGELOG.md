@@ -5,6 +5,19 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
 ---
 
+## [1.5.3]
+### Added
+- Log interactions with multiple contacts at once — group calls and meetings now appear in everyone's history, not just the primary contact.
+- Foundation for a Vinci companion app for Nextcloud: contacts and interactions will be viewable and editable from the web.
+
+### Improved
+- Sync now pulls in interactions logged on other devices too, not just pushing local changes up.
+
+### Fixed
+- An issue where syncing could occasionally create duplicate interactions.
+
+---
+
 ## [1.4.0]
 ### Added
 - Optional font pairing in Settings → Display: DM Serif Display for headings, Inter Tight for all UI text — consistent with the rest of the BARBURAS suite.

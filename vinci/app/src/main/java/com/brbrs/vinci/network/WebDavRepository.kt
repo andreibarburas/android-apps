@@ -5,6 +5,8 @@ import com.brbrs.vinci.auth.VinciSession
 import com.brbrs.vinci.data.CallLogDao
 import com.brbrs.vinci.data.CallLogEntity
 import com.brbrs.vinci.data.ContactDao
+import com.brbrs.vinci.util.parseParticipants
+import com.brbrs.vinci.util.stableLogId
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext
@@ -194,6 +196,35 @@ class WebDavRepository @Inject constructor(
         val unsynced = callLogDao.getUnsynced()
         for (log in unsynced) {
             if (uploadCallLog(log)) callLogDao.markSynced(log.id)
+        }
+    }
+
+    /**
+     * One-time-per-sync cleanup for the duplicate rows created by a now-fixed bug: before
+     * stableLogId() existed, a locally-created log's id (System.currentTimeMillis(), full
+     * precision) never matched the id restoreFromNextcloud() would derive when re-parsing the
+     * very same file (minute-truncated), so every locally-created interaction that got synced
+     * and then re-imported ended up duplicated as two rows -- one file, two local entries.
+     *
+     * Groups by (contact, same-minute timestamp) rather than comparing text fields like notes --
+     * an earlier version matched on reason/outcome/notes too, but long multi-line notes are
+     * prone to whitespace differences between "as typed" and "as re-parsed from the file",
+     * which silently defeated an exact-string match and let some duplicates slip through.
+     * Within the same contact and the same minute, two genuinely distinct interactions are
+     * very unlikely for personal use, so this is safe in practice.
+     */
+    suspend fun dedupeCallLogs() {
+        val all = callLogDao.getAllLogsOnce()
+        val groups = all.groupBy { Triple(it.contactId, it.normalizedPhone, it.callTimestamp / 60000) }
+        for ((_, group) in groups) {
+            if (group.size <= 1) continue
+            // Prefer whichever row already has the correct, re-derivable id; otherwise keep the lowest id.
+            val keep = group.firstOrNull { it.id == stableLogId(it.callTimestamp) } ?: group.minByOrNull { it.id }!!
+            for (log in group) {
+                if (log.id != keep.id) {
+                    callLogDao.deleteLog(log.id)
+                }
+            }
         }
     }
 
@@ -535,6 +566,11 @@ class WebDavRepository @Inject constructor(
                 else -> 0
             }
 
+            // Participants (extra people beyond the primary contact, e.g. group calls) —
+            // stored as a raw JSON line so it round-trips exactly; falls back to "[]" if absent/old file.
+            val participantsJson = lines.firstOrNull { it.startsWith("participants:") }
+                ?.substringAfter("participants:")?.trim()?.ifBlank { "[]" } ?: "[]"
+
             CallLogEntity(
                 id              = ts,  // timestamp as stable ID - prevents duplicates
                 contactId       = contactId,
@@ -548,6 +584,7 @@ class WebDavRepository @Inject constructor(
                 reason          = reason.ifBlank { "Other" },
                 outcome         = outcome.ifBlank { "Neutral" },
                 notes           = notes,
+                participants    = participantsJson,
                 followUpDays    = followUpDays,
                 isSynced        = true,
             )
@@ -570,14 +607,21 @@ class WebDavRepository @Inject constructor(
         val date     = SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault()).format(Date(log.callTimestamp))
         val followUp = if (log.followUpDays > 0) "Yes (${log.followUpDays} days)" else "No"
         val header   = "# ${log.interactionType} - ${log.contactName}"
+        val participantNames = parseParticipants(log.participants).map { it.name }
         val meta = buildString {
             appendLine("contact_uid: ${log.contactUid}")
             appendLine("contact_name: ${log.contactName}")
+            if (log.participants.isNotBlank() && log.participants != "[]") {
+                appendLine("participants: ${log.participants}")
+            }
             appendLine()
             appendLine("**Date:** $date  ")
             if (log.interactionType == "Call") {
                 appendLine("**Direction:** ${if (log.isOutgoing) "Outgoing" else "Incoming"}  ")
                 if (log.durationSeconds > 0) appendLine("**Duration:** ${formatDuration(log.durationSeconds)}  ")
+            }
+            if (participantNames.isNotEmpty()) {
+                appendLine("**With:** ${participantNames.joinToString(", ")}  ")
             }
             appendLine("**Reason:** ${log.reason}  ")
             appendLine("**Outcome:** ${log.outcome}  ")

@@ -104,6 +104,7 @@ data class CallLogEntity(
     val outcome: String,
     val notes: String,
     val tags: String = "",           // JSON array of user-defined tags, e.g. ["Recruiter","Catch-up"]
+    val participants: String = "[]", // JSON array of extra people in this interaction, e.g. group calls: [{"uid":"...","name":"Jane Doe"}]
     val followUpDays: Int = 0,
     val isSynced: Boolean = false,
 )
@@ -113,6 +114,10 @@ interface CallLogDao {
 
     @Query("SELECT * FROM call_logs WHERE contactId = :contactId ORDER BY callTimestamp DESC")
     fun getLogsForContact(contactId: Long): Flow<List<CallLogEntity>>
+
+    /** Interactions where this contact was added as an extra participant (e.g. group calls), not the primary contact. */
+    @Query("SELECT * FROM call_logs WHERE participants LIKE '%\"uid\":\"' || :contactUid || '\"%' ORDER BY callTimestamp DESC")
+    fun getLogsAsParticipant(contactUid: String): Flow<List<CallLogEntity>>
 
     @Query("SELECT MAX(callTimestamp) FROM call_logs WHERE contactId = :contactId")
     suspend fun getLatestTimestampForContact(contactId: Long): Long?
@@ -137,6 +142,9 @@ interface CallLogDao {
 
     @Query("SELECT * FROM call_logs ORDER BY callTimestamp DESC")
     fun getAllLogs(): Flow<List<CallLogEntity>>
+
+    @Query("SELECT * FROM call_logs ORDER BY contactId, callTimestamp")
+    suspend fun getAllLogsOnce(): List<CallLogEntity>
 
     @Query("SELECT * FROM call_logs WHERE id = :id")
     suspend fun getLogById(id: Long): CallLogEntity?
@@ -201,7 +209,7 @@ interface AttachmentDao {
 
 @Database(
     entities = [ContactEntity::class, CallLogEntity::class, AttachmentEntity::class],
-    version = 7,
+    version = 8,
     exportSchema = false,
 )
 abstract class VinciDatabase : RoomDatabase() {

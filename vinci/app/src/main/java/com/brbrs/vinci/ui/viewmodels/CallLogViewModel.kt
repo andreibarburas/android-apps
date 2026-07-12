@@ -11,7 +11,10 @@ import com.brbrs.vinci.data.ContactEntity
 import com.brbrs.vinci.network.WebDavRepository
 import com.brbrs.vinci.tasks.TasksOrgHelper
 import com.brbrs.vinci.tasks.TasksPreference
+import com.brbrs.vinci.util.InteractionParticipant
 import com.brbrs.vinci.util.normalizePhone
+import com.brbrs.vinci.util.serializeParticipants
+import com.brbrs.vinci.util.stableLogId
 import org.json.JSONArray
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -60,6 +63,12 @@ data class LogInteractionUiState(
     val interactionTimestamp: Long = System.currentTimeMillis(),
     val availableSocialTypes: List<String> = emptyList(),
     val selectedSocialPlatform: String = "",
+    // Additional people in this interaction (e.g. group calls) beyond the primary contact
+    val participants: List<InteractionParticipant> = emptyList(),
+    val participantQuery: String = "",
+    val participantSearchResults: List<ContactEntity> = emptyList(),
+    // uid -> photoUri, so participant chips can show a picture without a lookup on every recomposition
+    val participantPhotos: Map<String, String> = emptyMap(),
 )
 
 // Keep old name as alias
@@ -163,6 +172,53 @@ class CallLogViewModel @Inject constructor(
     fun onTimestampChanged(ts: Long)            { _uiState.update { it.copy(interactionTimestamp = ts) } }
     fun onContactNameInputChanged(name: String) { _uiState.update { it.copy(contactNameInput = name) } }
 
+    // -- Participants (extra people in this interaction, e.g. group calls) --------------
+
+    fun onParticipantQueryChanged(query: String) {
+        _uiState.update { it.copy(participantQuery = query) }
+        viewModelScope.launch {
+            val state = _uiState.value
+            if (query.isBlank()) {
+                _uiState.update { it.copy(participantSearchResults = emptyList()) }
+                return@launch
+            }
+            val existingUids = state.participants.mapNotNull { it.uid.ifBlank { null } }.toSet()
+            val results = contactDao.searchContacts(query).first()
+                .filter { c -> c.id != state.contact?.id && c.cardavUid !in existingUids }
+                .take(8)
+            _uiState.update { it.copy(participantSearchResults = results) }
+        }
+    }
+
+    fun addParticipantContact(contact: ContactEntity) {
+        _uiState.update {
+            if (it.participants.any { p -> p.uid.isNotBlank() && p.uid == contact.cardavUid }) return@update it
+            it.copy(
+                participants = it.participants + InteractionParticipant(uid = contact.cardavUid, name = contact.displayName),
+                participantQuery = "",
+                participantSearchResults = emptyList(),
+                participantPhotos = it.participantPhotos + (contact.cardavUid to contact.photoUri),
+            )
+        }
+    }
+
+    fun addParticipantFreeText(name: String) {
+        val trimmed = name.trim()
+        if (trimmed.isBlank()) return
+        _uiState.update {
+            if (it.participants.any { p -> p.name.equals(trimmed, ignoreCase = true) }) return@update it
+            it.copy(
+                participants = it.participants + InteractionParticipant(name = trimmed),
+                participantQuery = "",
+                participantSearchResults = emptyList(),
+            )
+        }
+    }
+
+    fun removeParticipant(participant: InteractionParticipant) {
+        _uiState.update { it.copy(participants = it.participants - participant) }
+    }
+
     /** Toggles a tag on/off. New tags (not in availableTags) are added to the available list. */
     fun toggleTag(tag: String) {
         val trimmed = tag.trim()
@@ -185,7 +241,7 @@ class CallLogViewModel @Inject constructor(
 
             val log = if (contact != null) {
                 CallLogEntity(
-                    id              = System.currentTimeMillis(),
+                    id              = stableLogId(state.interactionTimestamp),
                     contactId       = contact.id,
                     contactUid      = contact.cardavUid,
                     contactName     = contact.displayName,
@@ -199,13 +255,14 @@ class CallLogViewModel @Inject constructor(
                     outcome         = state.outcome,
                     notes           = state.notes,
                     tags            = tagsJson,
+                    participants    = serializeParticipants(state.participants),
                     followUpDays    = if (state.followUpEnabled) state.followUpDays else 0,
                     isSynced        = false,
                 )
             } else {
                 // Unknown-number interaction -- no contact, store the user's label as contactName
                 CallLogEntity(
-                    id              = System.currentTimeMillis(),
+                    id              = stableLogId(state.interactionTimestamp),
                     contactId       = null,
                     contactUid      = "",
                     contactName     = state.contactNameInput.ifBlank { state.phoneNumber.ifBlank { "Unknown" } },
@@ -219,12 +276,23 @@ class CallLogViewModel @Inject constructor(
                     outcome         = state.outcome,
                     notes           = state.notes,
                     tags            = tagsJson,
+                    participants    = serializeParticipants(state.participants),
                     followUpDays    = 0,
                     isSynced        = false,
                 )
             }
 
             callLogDao.insertLog(log)
+
+            // Bump lastCallTimestamp for any participants who are existing contacts too,
+            // so a group call also surfaces in their "recent contacts" on Home.
+            state.participants.forEach { participant ->
+                if (participant.uid.isNotBlank() && participant.uid != contact?.cardavUid) {
+                    contactDao.getContactByUid(participant.uid)?.let {
+                        contactDao.updateLastCall(it.id, state.interactionTimestamp)
+                    }
+                }
+            }
 
             if (contact != null) {
                 contactDao.updateLastCall(contact.id, state.interactionTimestamp)
