@@ -487,6 +487,15 @@ fun SettingsScreen(
                             context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/andreibarburas/android-apps")))
                         }
                     )
+                    HorizontalDivider(color = MaterialTheme.colorScheme.outline)
+                    SupportLinkRow(
+                        painter = androidx.compose.ui.res.painterResource(R.drawable.ic_reddit),
+                        title = stringResource(R.string.settings_reddit),
+                        subtitle = stringResource(R.string.settings_reddit_subtitle),
+                        onClick = {
+                            context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://www.reddit.com/r/BarburasLab/")))
+                        }
+                    )
                 }
             }
 
@@ -537,6 +546,28 @@ private fun SupportLinkRow(
             .padding(horizontal = 4.dp, vertical = 2.dp),
     ) {
         Icon(icon, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(18.dp))
+        Spacer(Modifier.width(10.dp))
+        Column(modifier = Modifier.weight(1f)) {
+            Text(title, color = MaterialTheme.colorScheme.onSurface, style = MaterialTheme.typography.bodyMedium)
+            Text(subtitle, color = MaterialTheme.colorScheme.onSurfaceVariant, style = MaterialTheme.typography.labelSmall)
+        }
+    }
+}
+
+@Composable
+private fun SupportLinkRow(
+    painter: androidx.compose.ui.graphics.painter.Painter,
+    title: String,
+    subtitle: String,
+    onClick: () -> Unit,
+) {
+    TextButton(
+        onClick = onClick,
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 4.dp, vertical = 2.dp),
+    ) {
+        Icon(painter, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(18.dp))
         Spacer(Modifier.width(10.dp))
         Column(modifier = Modifier.weight(1f)) {
             Text(title, color = MaterialTheme.colorScheme.onSurface, style = MaterialTheme.typography.bodyMedium)

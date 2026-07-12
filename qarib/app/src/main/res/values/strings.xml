@@ -124,7 +124,9 @@
     <string name="settings_privacy_policy_subtitle">How Qarib handles your data</string>
     <string name="settings_view_on_github">View on GitHub</string>
     <string name="settings_view_on_github_subtitle">Feedback, feature requests and source code</string>
-    <string name="settings_footer">Qarib 1.1.0 · by andrei BARBURAS</string>
+    <string name="settings_reddit">Join r/BarburasLab</string>
+    <string name="settings_reddit_subtitle">Discuss Qarib and my other apps on Reddit</string>
+    <string name="settings_footer">Qarib 1.1.1 · by andrei BARBURAS</string>
 
     <!-- App lock screen -->
     <string name="applock_touch_to_unlock_hint">Touch the sensor to unlock</string>

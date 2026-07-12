@@ -1,5 +1,10 @@
 # Changelog
 
+## [1.1.1] - 2026-07-12
+
+✨ New:
+- Added link to r/BarburasLab — the community hub for all BARBURAS apps
+
 ## [1.1.0] - 2026-07-08
 
 ✨ New:
