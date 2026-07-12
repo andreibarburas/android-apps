@@ -1,1 +1,0 @@
-Log interactions with multiple contacts at once. Sync now pulls in remote interactions too. Fixed duplicate interactions on sync.
