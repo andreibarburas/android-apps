@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Nóta</string>
+
+    <!-- Notes List -->
+    <string name="notes_count_synced">%1$d notatek · zsynchronizowano</string>
+    <string name="notes_count_syncing">%1$d notatek · synchronizacja…</string>
+    <string name="search_notes">Szukaj notatek…</string>
+    <string name="category_all">Wszystkie</string>
+    <string name="section_pinned">Przypięte</string>
+    <string name="section_recent">Ostatnie</string>
+    <string name="new_note">Nowa notatka</string>
+    <string name="untitled">Bez tytułu</string>
+    <string name="protected_note">Notatka chroniona</string>
+    <string name="image_placeholder">📎 obraz</string>
+
+    <!-- Note Editor -->
+    <string name="back">Wstecz</string>
+    <string name="toggle_preview">Przełącz podgląd</string>
+    <string name="lock_note">Zablokuj notatkę</string>
+    <string name="delete">Usuń</string>
+    <string name="more">Więcej</string>
+    <string name="category_label">kategoria</string>
+    <string name="no_category">Brak kategorii</string>
+    <string name="new_category">Nowa kategoria…</string>
+    <string name="title_placeholder">Tytuł</string>
+    <string name="start_writing">Zacznij pisać…</string>
+    <string name="uploading_image">Wysyłanie obrazu do Nextcloud…</string>
+    <string name="note_locked">Notatka zablokowana</string>
+    <string name="note_locked_description">Ta notatka jest chroniona.\nUżyj odcisku palca, aby odblokować.</string>
+    <string name="unlock_note">Odblokuj notatkę</string>
+    <string name="touch_to_unlock">Dotknij, aby odblokować</string>
+    <string name="go_back">Wróć</string>
+
+    <!-- Settings -->
+    <string name="settings">Ustawienia</string>
+    <string name="section_account">Konto</string>
+    <string name="connected_to">Połączono z</string>
+    <string name="sign_out">Wyloguj się</string>
+    <string name="section_security">Bezpieczeństwo</string>
+    <string name="app_lock">Blokada aplikacji</string>
+    <string name="app_lock_description">Wymagaj biometrii podczas otwierania Nóty</string>
+    <string name="section_integrations">Integracje</string>
+    <string name="tasks_org">Tasks.org</string>
+    <string name="tasks_org_description">Dodawaj notatki jako zadania w Tasks.org</string>
+    <string name="tasks_org_not_installed">Tasks.org nie jest zainstalowany</string>
+    <string name="section_sync">Synchronizacja</string>
+    <string name="manual_sync">Synchronizacja ręczna</string>
+    <string name="last_synced">Ostatnia synchronizacja: %1$s</string>
+    <string name="last_synced_never">Nigdy</string>
+    <string name="sync_now">Synchronizuj teraz</string>
+    <string name="section_support">Wsparcie</string>
+    <string name="buy_me_coffee">Postaw mi kawę</string>
+    <string name="buy_me_coffee_description">Jeśli Nóta ułatwia Ci życie, drobny napiwek znaczy bardzo wiele</string>
+    <string name="more_by_author">Więcej od andrei BARBURAS</string>
+    <string name="more_by_author_description">Zobacz, co jeszcze tworzę na barburas.com</string>
+    <string name="view_on_github">Zobacz na GitHub</string>
+    <string name="view_on_github_description">Opinie, propozycje funkcji i kod źródłowy</string>
+    <string name="app_footer">Nóta %1$s · autor andrei BARBURAS</string>
+
+    <!-- Login -->
+    <string name="login_title">Połącz z Nextcloud</string>
+    <string name="server_url">Adres URL serwera</string>
+    <string name="server_url_placeholder">https://cloud.example.com</string>
+    <string name="connect">Połącz</string>
+    <string name="approve_in_browser">Zatwierdź połączenie w przeglądarce, a następnie wróć tutaj.</string>
+    <string name="nextcloud_required">⚠️ Wymagany serwer Nextcloud</string>
+    <string name="nextcloud_required_description">Nóta jest klientem Nextcloud Notes. Wymaga serwera Nextcloud do działania. Możesz postawić własny serwer lub skorzystać z usługi hostingowej Nextcloud.</string>
+    <string name="find_hosting_partner">Znajdź partnera hostingowego Nextcloud →</string>
+
+    <!-- App Lock -->
+    <string name="unlock_nota">Odblokuj Nótę</string>
+    <string name="use_biometrics">Użyj biometrii, aby kontynuować</string>
+
+    <!-- Markdown toolbar -->
+    <string name="markdown_bold">B</string>
+    <string name="markdown_italic">I</string>
+    <string name="markdown_heading">#</string>
+    <string name="markdown_divider">—</string>
+    <string name="markdown_checkbox">[ ]</string>
+</resources>
