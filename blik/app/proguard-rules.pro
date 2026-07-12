@@ -1,4 +1,0 @@
--keep class com.brbrs.blik.** { *; }
--keep class org.json.** { *; }
--keepattributes Signature
--keepattributes *Annotation*
