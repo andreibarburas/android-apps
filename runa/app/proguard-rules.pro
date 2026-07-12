@@ -1,2 +1,0 @@
--keepattributes SourceFile,LineNumberTable
--keep class com.brbrs.runa.** { *; }
