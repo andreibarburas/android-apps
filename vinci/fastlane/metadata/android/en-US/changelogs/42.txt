@@ -1,0 +1,1 @@
+Fixed: Vinci folder is now editable in Settings and can be set during onboarding.

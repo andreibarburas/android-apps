@@ -5,6 +5,13 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
 ---
 
+## [1.6.0]
+### Fixed
+- Vinci folder was not editable — the field in Settings → Nextcloud is now tappable and opens an edit dialog.
+- Vinci folder can now also be set during onboarding, before connecting to Nextcloud.
+
+---
+
 ## [1.5.3]
 ### Added
 - Log interactions with multiple contacts at once — group calls and meetings now appear in everyone's history, not just the primary contact.

@@ -164,7 +164,7 @@ object AppModule {
             .addInterceptor { chain ->
                 chain.proceed(
                     chain.request().newBuilder()
-                        .header("User-Agent", "Vinci/1.5.3 (Android)")
+                        .header("User-Agent", "Vinci/1.6.0 (Android)")
                         .build()
                 )
             }

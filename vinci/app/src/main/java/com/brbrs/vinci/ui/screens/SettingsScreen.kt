@@ -36,6 +36,8 @@ fun SettingsScreen(
     val context  = LocalContext.current
     val isDark   = LocalIsDark.current
     val snackbarHostState = remember { SnackbarHostState() }
+    var showFolderDialog by remember { mutableStateOf(false) }
+    var folderInput by remember { mutableStateOf("") }
 
     LaunchedEffect(uiState.loggedOut) {
         if (uiState.loggedOut) onLoggedOut()
@@ -45,6 +47,43 @@ fun SettingsScreen(
         uiState.restoreResult?.let { msg ->
             snackbarHostState.showSnackbar(msg, duration = SnackbarDuration.Short)
         }
+    }
+
+    if (showFolderDialog) {
+        AlertDialog(
+            onDismissRequest = { showFolderDialog = false },
+            title = { Text("Vinci folder") },
+            text = {
+                Column {
+                    Text(
+                        "The folder name Vinci uses on Nextcloud for syncing.",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                    Spacer(Modifier.height(12.dp))
+                    OutlinedTextField(
+                        value = folderInput,
+                        onValueChange = { folderInput = it },
+                        placeholder = { Text("Vinci") },
+                        singleLine = true,
+                        modifier = Modifier.fillMaxWidth(),
+                    )
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = {
+                    viewModel.setVinciFolder(folderInput)
+                    showFolderDialog = false
+                }) {
+                    Text("Save", color = MaterialTheme.colorScheme.primary)
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showFolderDialog = false }) {
+                    Text("Cancel", color = MaterialTheme.colorScheme.onSurfaceVariant)
+                }
+            },
+        )
     }
 
     Box(
@@ -87,7 +126,13 @@ fun SettingsScreen(
                     }
                     HorizontalDivider(color = MaterialTheme.colorScheme.outline)
                     Row(
-                        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 10.dp),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable {
+                                folderInput = uiState.vinciFolder
+                                showFolderDialog = true
+                            }
+                            .padding(horizontal = 16.dp, vertical = 10.dp),
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
@@ -455,7 +500,7 @@ fun SettingsScreen(
 
             Spacer(Modifier.height(32.dp))
             Text(
-                "Vinci 1.5.3 · by andrei BARBURAS",
+                "Vinci 1.6.0 · by andrei BARBURAS",
                 style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 textAlign = TextAlign.Center,

@@ -143,6 +143,10 @@ class SettingsViewModel @Inject constructor(
         viewModelScope.launch { authRepository.setAppLockEnabled(enabled) }
     }
 
+    fun setVinciFolder(folder: String) {
+        viewModelScope.launch { authRepository.saveVinciFolder(folder.trim().ifBlank { "Vinci" }) }
+    }
+
     fun toggleTasks(enabled: Boolean) {
         viewModelScope.launch { tasksPref.setEnabled(enabled) }
     }
