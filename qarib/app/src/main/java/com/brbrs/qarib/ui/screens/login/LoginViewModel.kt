@@ -16,6 +16,7 @@ import javax.inject.Inject
 
 data class LoginUiState(
     val serverUrl: String = "",
+    val qaribFolder: String = "Qarib",
     val isLoading: Boolean = false,
     val loginUrl: String? = null,
     val error: String? = null,
@@ -32,6 +33,10 @@ class LoginViewModel @Inject constructor(
 
     fun onServerUrlChanged(url: String) {
         _uiState.update { it.copy(serverUrl = url, error = null) }
+    }
+
+    fun onFolderChanged(folder: String) {
+        _uiState.update { it.copy(qaribFolder = folder) }
     }
 
     fun startLogin() {
@@ -81,6 +86,7 @@ class LoginViewModel @Inject constructor(
                             serverUrl = serverUrl.trimEnd('/'),
                             username = creds.loginName,
                             appPassword = creds.appPassword,
+                            qaribFolder = uiState.value.qaribFolder.trim().ifBlank { "Qarib" },
                         )
                     )
                     _uiState.update { it.copy(loginSuccess = true) }

@@ -86,6 +86,9 @@
     <string name="settings_section_account">Account</string>
     <string name="settings_connected_to">Connected to</string>
     <string name="settings_qarib_folder">Qarib folder</string>
+    <string name="settings_qarib_folder_hint">Folder name on Nextcloud</string>
+    <string name="dialog_save">Save</string>
+    <string name="dialog_cancel">Cancel</string>
     <string name="settings_sign_out">Sign out</string>
 
     <!-- Security section -->
@@ -126,7 +129,7 @@
     <string name="settings_view_on_github_subtitle">Feedback, feature requests and source code</string>
     <string name="settings_reddit">Join r/BarburasLab</string>
     <string name="settings_reddit_subtitle">Discuss Qarib and my other apps on Reddit</string>
-    <string name="settings_footer">Qarib 1.1.1 · by andrei BARBURAS</string>
+    <string name="settings_footer">Qarib 1.2.0 · by andrei BARBURAS</string>
 
     <!-- App lock screen -->
     <string name="applock_touch_to_unlock_hint">Touch the sensor to unlock</string>

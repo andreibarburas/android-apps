@@ -31,11 +31,13 @@ import androidx.compose.material.icons.outlined.Fingerprint
 import androidx.compose.material.icons.outlined.Folder
 import androidx.compose.material.icons.outlined.Language
 import androidx.compose.material.icons.outlined.PrivacyTip
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
@@ -44,6 +46,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -142,9 +147,13 @@ fun SettingsScreen(
                         )
                     }
                     HorizontalDivider(color = MaterialTheme.colorScheme.outline)
+                    var showFolderDialog by remember { mutableStateOf(false) }
+                    var folderInput by remember(uiState.qaribFolder) { mutableStateOf(uiState.qaribFolder) }
+
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
+                            .clickable { showFolderDialog = true }
                             .padding(horizontal = 16.dp, vertical = 10.dp),
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically,
@@ -164,8 +173,37 @@ fun SettingsScreen(
                         Icon(
                             Icons.Outlined.Folder,
                             contentDescription = null,
-                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                            tint = MaterialTheme.colorScheme.primary,
                             modifier = Modifier.size(20.dp)
+                        )
+                    }
+
+                    if (showFolderDialog) {
+                        AlertDialog(
+                            onDismissRequest = { showFolderDialog = false },
+                            title = { Text(stringResource(R.string.settings_qarib_folder)) },
+                            text = {
+                                OutlinedTextField(
+                                    value = folderInput,
+                                    onValueChange = { folderInput = it },
+                                    singleLine = true,
+                                    label = { Text(stringResource(R.string.settings_qarib_folder_hint)) },
+                                    modifier = Modifier.fillMaxWidth(),
+                                )
+                            },
+                            confirmButton = {
+                                TextButton(onClick = {
+                                    viewModel.setQaribFolder(folderInput)
+                                    showFolderDialog = false
+                                }) {
+                                    Text(stringResource(R.string.dialog_save))
+                                }
+                            },
+                            dismissButton = {
+                                TextButton(onClick = { showFolderDialog = false }) {
+                                    Text(stringResource(R.string.dialog_cancel))
+                                }
+                            },
                         )
                     }
                     HorizontalDivider(color = MaterialTheme.colorScheme.outline)

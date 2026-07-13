@@ -127,6 +127,11 @@ class SettingsViewModel @Inject constructor(
         viewModelScope.launch { authRepository.setAppLockEnabled(enabled) }
     }
 
+    fun setQaribFolder(folder: String) {
+        val trimmed = folder.trim().ifBlank { "Qarib" }
+        viewModelScope.launch { authRepository.saveQaribFolder(trimmed) }
+    }
+
     fun syncNow() {
         viewModelScope.launch {
             _isSyncing.value = true

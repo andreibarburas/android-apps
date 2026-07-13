@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.2.0] - 2026-07-13
+
+🐛 Fixed:
+- Qarib folder was not editable; the field in Settings > Nextcloud is now tappable and opens an edit dialog
+- Qarib folder can now also be set during onboarding, before connecting to Nextcloud
+
 ## [1.1.1] - 2026-07-12
 
 ✨ New:
