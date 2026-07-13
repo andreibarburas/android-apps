@@ -184,10 +184,31 @@ fun BookmarkListScreen(
                     modifier              = Modifier.fillMaxWidth(),
                 ) {
                     item {
-                        TagChip("All", state.selectedTag == null, isDark) { vm.onTagSelected(null) }
+                        TagChip("All", state.selectedTag == null && state.selectedFolderId == null, isDark) {
+                            vm.onTagSelected(null)
+                        }
                     }
                     items(tags) { tag ->
                         TagChip(tag, state.selectedTag == tag, isDark) { vm.onTagSelected(tag) }
+                    }
+                }
+                Spacer(Modifier.height(8.dp))
+            }
+
+            // ── Folder chips ──────────────────────────────────────────────────
+            if (state.folders.isNotEmpty()) {
+                LazyRow(
+                    contentPadding        = PaddingValues(horizontal = 20.dp),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    modifier              = Modifier.fillMaxWidth(),
+                ) {
+                    items(state.folders) { folder ->
+                        FolderChip(
+                            label    = folder.title,
+                            selected = state.selectedFolderId == folder.id,
+                            isDark   = isDark,
+                            onClick  = { vm.onFolderSelected(folder.id) },
+                        )
                     }
                 }
                 Spacer(Modifier.height(12.dp))
@@ -230,22 +251,31 @@ fun BookmarkListScreen(
                 ) {
                     // Section header with badge count
                     item {
+                        val headerLabel = when {
+                            state.selectedFolderId != null ->
+                                state.folders.find { it.id == state.selectedFolderId }?.title
+                                    ?: "Folder"
+                            state.selectedTag != null -> "#${state.selectedTag}"
+                            state.searchQuery.isNotBlank() -> "Results"
+                            else -> "All bookmarks"
+                        }
                         SectionHeader(
-                            label  = "All bookmarks",
+                            label  = headerLabel,
                             count  = state.bookmarks.size,
                             isDark = isDark,
                         )
                     }
                     items(state.bookmarks, key = { it.id }) { bookmark ->
                         BookmarkCard(
-                            bookmark     = bookmark,
-                            tasksEnabled = state.tasksEnabled,
-                            isDark       = isDark,
-                            serverUrl    = state.serverUrl,
-                            authHeader   = state.authHeader,
-                            onClick      = { onOpen(bookmark.id) },
-                            onEdit       = { onEdit(bookmark.id) },
-                            onDelete     = { vm.onDeleteBookmark(bookmark.id) },
+                            bookmark         = bookmark,
+                            tasksEnabled     = state.tasksEnabled,
+                            isDark           = isDark,
+                            serverUrl        = state.serverUrl,
+                            authHeader       = state.authHeader,
+                            selectedFolderId = state.selectedFolderId,
+                            onClick          = { onOpen(bookmark.id) },
+                            onEdit           = { onEdit(bookmark.id) },
+                            onDelete         = { vm.onDeleteBookmark(bookmark.id) },
                         )
                     }
                     item { Spacer(Modifier.height(80.dp)) }
@@ -325,6 +355,34 @@ private fun TagChip(label: String, selected: Boolean, isDark: Boolean, onClick: 
     }
 }
 
+// ── Folder chip ───────────────────────────────────────────────────────────────
+
+@Composable
+private fun FolderChip(label: String, selected: Boolean, isDark: Boolean, onClick: () -> Unit) {
+    Row(
+        modifier = Modifier
+            .merkChip(isDark = isDark, selected = selected)
+            .clickable(onClick = onClick)
+            .padding(horizontal = 12.dp, vertical = 7.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(5.dp),
+    ) {
+        Icon(
+            Icons.Outlined.Folder,
+            contentDescription = null,
+            tint     = if (selected) MaterialTheme.colorScheme.primary
+                       else MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.size(14.dp),
+        )
+        Text(
+            label,
+            style = MaterialTheme.typography.bodyMedium,
+            color = if (selected) MaterialTheme.colorScheme.primary
+                    else MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+    }
+}
+
 // ── Bookmark card ─────────────────────────────────────────────────────────────
 
 @OptIn(ExperimentalFoundationApi::class)
@@ -335,6 +393,7 @@ private fun BookmarkCard(
     isDark: Boolean,
     serverUrl: String,
     authHeader: String,
+    selectedFolderId: Long?,
     onClick: () -> Unit,
     onEdit: () -> Unit,
     onDelete: () -> Unit,
@@ -343,6 +402,7 @@ private fun BookmarkCard(
     val tagList  = remember(bookmark.tags) {
         bookmark.tags.split(",").map { it.trim() }.filter { it.isNotBlank() }
     }
+    val showFolderPill = selectedFolderId != null && bookmark.folderName.isNotBlank()
 
     Box(
         modifier = Modifier
@@ -381,9 +441,31 @@ private fun BookmarkCard(
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                 )
-                if (tagList.isNotEmpty()) {
+                if (tagList.isNotEmpty() || showFolderPill) {
                     Spacer(Modifier.height(7.dp))
                     Row(horizontalArrangement = Arrangement.spacedBy(5.dp)) {
+                        if (showFolderPill) {
+                            Row(
+                                modifier = Modifier
+                                    .clip(RoundedCornerShape(6.dp))
+                                    .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.11f))
+                                    .padding(horizontal = 7.dp, vertical = 3.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(4.dp),
+                            ) {
+                                Icon(
+                                    Icons.Outlined.Folder,
+                                    contentDescription = null,
+                                    tint     = MaterialTheme.colorScheme.primary.copy(alpha = 0.85f),
+                                    modifier = Modifier.size(11.dp),
+                                )
+                                Text(
+                                    bookmark.folderName,
+                                    style = MaterialTheme.typography.labelMedium,
+                                    color = MaterialTheme.colorScheme.primary.copy(alpha = 0.85f),
+                                )
+                            }
+                        }
                         tagList.take(4).forEach { tag ->
                             Box(
                                 modifier = Modifier

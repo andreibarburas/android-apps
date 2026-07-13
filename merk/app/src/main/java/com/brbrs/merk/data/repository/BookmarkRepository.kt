@@ -23,6 +23,7 @@ class BookmarkRepository @Inject constructor(
     fun observeAll(): Flow<List<BookmarkEntity>> = bookmarkDao.observeAll()
     fun search(query: String): Flow<List<BookmarkEntity>> = bookmarkDao.search(query)
     fun filterByTag(tag: String): Flow<List<BookmarkEntity>> = bookmarkDao.filterByTag(tag)
+    fun filterByFolder(folderId: Long): Flow<List<BookmarkEntity>> = bookmarkDao.filterByFolder(folderId)
     fun observeFolders(): Flow<List<FolderEntity>> = folderDao.observeAll()
 
     suspend fun getAllTags(): List<String> = withContext(Dispatchers.IO) {

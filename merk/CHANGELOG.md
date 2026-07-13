@@ -2,6 +2,13 @@
 
 All notable changes to Merk are documented here.
 
+## [1.2.0] - 2026-07-13
+
+- ✨ New: folder filtering — a row of folder chips appears below the tag chips on the bookmark list. Tap a folder to show only its bookmarks; tap again to deselect. Selecting a folder clears any active tag filter and vice versa. The section header updates to show the active folder name.
+- ✨ New: when filtering by folder, each bookmark card shows a folder pill with a folder icon and folder name, matching the behaviour of tag pills when filtering by tag.
+
+---
+
 ## [1.1.1] - 2026-07-12
 
 - ✨ New: link to the r/BarburasLab community subreddit in Settings > Support
