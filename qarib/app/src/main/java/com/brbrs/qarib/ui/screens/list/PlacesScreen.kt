@@ -64,8 +64,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.brbrs.qarib.R
-import com.brbrs.qarib.domain.model.Place
-import com.brbrs.qarib.ui.components.PlaceDetailSheet
+import com.brbrs.qarib.domain.model.Place as DomainPlace
 import com.brbrs.qarib.ui.components.PlaceListItem
 import com.brbrs.qarib.ui.screens.map.OsmMapView
 import com.brbrs.qarib.ui.theme.LocalIsDark
@@ -81,6 +80,7 @@ import kotlinx.coroutines.launch
 @Composable
 fun PlacesScreen(
     onAddPlace: (String) -> Unit,
+    onPlaceDetail: (String) -> Unit,
     onEditPlace: (String) -> Unit,
     onSettings: () -> Unit,
     viewModel: PlacesViewModel = hiltViewModel()
@@ -89,7 +89,6 @@ fun PlacesScreen(
     val sections by viewModel.countrySections.collectAsState()
     val uiState by viewModel.uiState.collectAsState()
     val themeMode by viewModel.themeMode.collectAsState()
-    var selectedPlace by remember { mutableStateOf<Place?>(null) }
     var showMoreFilters by remember { mutableStateOf(false) }
     val isDark = LocalIsDark.current
 
@@ -195,14 +194,14 @@ fun PlacesScreen(
                             PlacesView.MAP -> {
                                 OsmMapView(
                                     places = mapPlaces,
-                                    onMarkerClick = { selectedPlace = it },
+                                    onMarkerClick = { place -> onPlaceDetail(place.id) },
                                     modifier = Modifier.fillMaxSize()
                                 )
                             }
                             PlacesView.LIST -> {
                                 CountryGroupedList(
                                     sections = sections,
-                                    onPlaceClick = { selectedPlace = it },
+                                    onPlaceClick = { placeId -> onPlaceDetail(placeId) },
                                 )
                             }
                         }
@@ -210,20 +209,6 @@ fun PlacesScreen(
                 }
             }
         }
-    }
-
-    selectedPlace?.let { place ->
-        PlaceDetailSheet(
-            place = place,
-            onDismiss = { selectedPlace = null },
-            onDelete = { viewModel.deletePlace(it.id) },
-            onEdit = {
-                selectedPlace = null
-                onEditPlace(it.id)
-            },
-            onToggleVisited = { viewModel.setVisited(it.id, !it.visited) },
-            onToggleMuted = { viewModel.setNotificationsMuted(it.id, !it.notificationsMuted) },
-        )
     }
 
     if (showMoreFilters) {
@@ -412,14 +397,14 @@ private fun Modifier.clickableNoIndication(onClick: () -> Unit): Modifier {
  */
 private sealed class ListRow {
     data class Header(val country: String) : ListRow()
-    data class Item(val place: Place) : ListRow()
+    data class Item(val place: DomainPlace) : ListRow()
     data class VisitedLabel(val country: String) : ListRow()
 }
 
 @Composable
 private fun CountryGroupedList(
     sections: List<CountrySection>,
-    onPlaceClick: (Place) -> Unit,
+    onPlaceClick: (String) -> Unit,
 ) {
     val rows = remember(sections) {
         buildList {
@@ -468,7 +453,7 @@ private fun CountryGroupedList(
                     is ListRow.VisitedLabel -> VisitedSectionLabel()
                     is ListRow.Item -> PlaceListItem(
                         place = row.place,
-                        onClick = { onPlaceClick(row.place) },
+                        onClick = { onPlaceClick(row.place.id) },
                         modifier = if (row.place.visited) Modifier.alpha(0.5f) else Modifier,
                     )
                 }

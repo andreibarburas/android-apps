@@ -28,6 +28,9 @@ sealed class QaribRoute(val route: String) {
     object EditPlace : QaribRoute("edit_place/{$PLACE_ID_ARG}") {
         fun createRoute(placeId: String) = "edit_place/$placeId"
     }
+    object PlaceDetail : QaribRoute("place_detail/{$PLACE_ID_ARG}") {
+        fun createRoute(placeId: String) = "place_detail/$placeId"
+    }
     object Settings : QaribRoute("settings")
 
     companion object {

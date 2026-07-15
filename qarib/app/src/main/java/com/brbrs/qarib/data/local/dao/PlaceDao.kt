@@ -20,14 +20,35 @@ interface PlaceDao {
     @Query("SELECT * FROM places")
     suspend fun getAllIncludingDeleted(): List<PlaceEntity>
 
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun upsert(place: PlaceEntity)
-
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun upsertAll(places: List<PlaceEntity>)
+    /**
+     * Safe upsert: INSERT-or-IGNORE (never deletes the row, so ON DELETE CASCADE
+     * on child visits is never triggered), followed by UPDATE for existing rows.
+     *
+     * DO NOT use OnConflictStrategy.REPLACE here — SQLite implements REPLACE as
+     * DELETE + INSERT, which fires the foreign-key CASCADE and wipes all visits
+     * for the place being upserted.
+     */
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    suspend fun insertIgnore(place: PlaceEntity): Long
 
     @Update
     suspend fun update(place: PlaceEntity)
+
+    suspend fun upsert(place: PlaceEntity) {
+        if (insertIgnore(place) == -1L) update(place)
+    }
+
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    suspend fun insertAllIgnore(places: List<PlaceEntity>): List<Long>
+
+    suspend fun upsertAll(places: List<PlaceEntity>) {
+        val results = insertAllIgnore(places)
+        val toUpdate = places.zip(results).filter { (_, id) -> id == -1L }.map { it.first }
+        if (toUpdate.isNotEmpty()) updateAll(toUpdate)
+    }
+
+    @Update
+    suspend fun updateAll(places: List<PlaceEntity>)
 
     @Query("SELECT * FROM places WHERE country = '' AND deleted = 0")
     suspend fun getPlacesWithEmptyCountry(): List<PlaceEntity>
@@ -44,11 +65,9 @@ interface PlaceDao {
     @Query("UPDATE places SET notificationsMuted = :muted, updatedAt = :timestamp WHERE id = :id")
     suspend fun setNotificationsMuted(id: String, muted: Boolean, timestamp: Long)
 
-    /** Suppresses "nearby" notifications for [id] until [until] (epoch millis). */
     @Query("UPDATE places SET snoozedUntil = :until WHERE id = :id")
     suspend fun setSnoozedUntil(id: String, until: Long?)
 
-    /** Suppresses "nearby" notifications for [id] until the user exits its geofence. */
     @Query("UPDATE places SET snoozedUntilExit = :snoozed WHERE id = :id")
     suspend fun setSnoozedUntilExit(id: String, snoozed: Boolean)
 

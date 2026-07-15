@@ -33,6 +33,7 @@ class NextcloudWebDavClient(
         const val PLACES_FILE = "places.json"
         const val PREFERENCES_FILE = "preferences.json"
         const val PHOTOS_FOLDER = "photos"
+        const val VISIT_PHOTOS_FOLDER = "visit-photos"
     }
 
     private fun authedClient(session: QaribSession): OkHttpClient = httpClient.newBuilder()
@@ -142,6 +143,22 @@ class NextcloudWebDavClient(
                 } else {
                     Result.Error("Could not create photos folder (${response.code})")
                 }
+            }
+        } catch (e: IOException) {
+            Result.Error(e.message ?: "Network error")
+        }
+    }
+
+    suspend fun ensureVisitPhotosFolder(session: QaribSession): Result<Unit> = withContext(Dispatchers.IO) {
+        val client = authedClient(session)
+        val request = Request.Builder()
+            .url("${davBase(session)}/$VISIT_PHOTOS_FOLDER")
+            .method("MKCOL", null)
+            .build()
+        try {
+            client.newCall(request).execute().use { response ->
+                if (response.code == 201 || response.code == 405) Result.Success(Unit)
+                else Result.Error("Could not create visit-photos folder (${response.code})")
             }
         } catch (e: IOException) {
             Result.Error(e.message ?: "Network error")

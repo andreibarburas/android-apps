@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.3.0] - 2026-07-15
+
+✨ Added:
+- Each place now has a dedicated detail screen (replacing the bottom sheet) with full place info, actions, and visit history
+- Visit history: log visits to a place with a date, notes, and photos
+- Edit and delete individual visits
+- Visit history syncs across devices via Nextcloud
+
 ## [1.2.0] - 2026-07-13
 
 🐛 Fixed:

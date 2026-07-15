@@ -62,7 +62,7 @@ object AppModule {
             .addInterceptor { chain ->
                 chain.proceed(
                     chain.request().newBuilder()
-                        .header("User-Agent", "Qarib/1.2.0 (Android)")
+                        .header("User-Agent", "Qarib/1.3.0 (Android)")
                         .build()
                 )
             }
@@ -73,11 +73,15 @@ object AppModule {
     @Singleton
     fun provideQaribDatabase(@ApplicationContext context: Context): QaribDatabase =
         Room.databaseBuilder(context, QaribDatabase::class.java, QaribDatabase.DATABASE_NAME)
-            .addMigrations(QaribDatabase.MIGRATION_1_2, QaribDatabase.MIGRATION_2_3, QaribDatabase.MIGRATION_3_4, QaribDatabase.MIGRATION_4_5)
+            .addMigrations(QaribDatabase.MIGRATION_1_2, QaribDatabase.MIGRATION_2_3, QaribDatabase.MIGRATION_3_4, QaribDatabase.MIGRATION_4_5, QaribDatabase.MIGRATION_5_6)
             .build()
 
     @Provides
     fun providePlaceDao(database: QaribDatabase): PlaceDao = database.placeDao()
+
+    @Provides
+    @Singleton
+    fun provideVisitDao(database: QaribDatabase): com.brbrs.qarib.data.local.dao.VisitDao = database.visitDao()
 
     @Provides
     @Singleton

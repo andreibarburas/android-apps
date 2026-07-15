@@ -21,6 +21,7 @@ import com.brbrs.qarib.data.sync.SyncScheduler
 import com.brbrs.qarib.ui.navigation.QaribRoute
 import com.brbrs.qarib.ui.screens.add.AddPlaceScreen
 import com.brbrs.qarib.ui.screens.applock.AppLockScreen
+import com.brbrs.qarib.ui.screens.detail.PlaceDetailScreen
 import com.brbrs.qarib.ui.screens.edit.EditPlaceScreen
 import com.brbrs.qarib.ui.screens.list.PlacesScreen
 import com.brbrs.qarib.ui.screens.login.LoginScreen
@@ -126,8 +127,21 @@ private fun QaribNavHost() {
         composable(QaribRoute.Places.route) {
             PlacesScreen(
                 onAddPlace = { query -> navController.navigate(QaribRoute.AddPlace.createRoute(query)) },
+                onPlaceDetail = { placeId -> navController.navigate(QaribRoute.PlaceDetail.createRoute(placeId)) },
                 onEditPlace = { placeId -> navController.navigate(QaribRoute.EditPlace.createRoute(placeId)) },
                 onSettings = { navController.navigate(QaribRoute.Settings.route) }
+            )
+        }
+        composable(
+            route = QaribRoute.PlaceDetail.route,
+            arguments = listOf(androidx.navigation.navArgument(QaribRoute.PLACE_ID_ARG) {
+                type = androidx.navigation.NavType.StringType
+            })
+        ) {
+            PlaceDetailScreen(
+                onBack = { navController.popBackStack() },
+                onEdit = { placeId -> navController.navigate(QaribRoute.EditPlace.createRoute(placeId)) },
+                onDeleted = { navController.popBackStack() },
             )
         }
         composable(

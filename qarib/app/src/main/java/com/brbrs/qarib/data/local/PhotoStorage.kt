@@ -128,6 +128,37 @@ class PhotoStorage @Inject constructor(
 
     data class CameraCapture(val file: File, val uri: Uri)
 
+    /**
+     * Saves a photo for a specific visit (keyed by [visitId]).
+     * Same resize/orient pipeline as [savePhoto]. Returns the new
+     * file's absolute path, or null on failure.
+     */
+    suspend fun saveVisitPhoto(sourceUri: Uri, visitId: String): String? =
+        withContext(Dispatchers.IO) {
+            try {
+                val bitmap = decodeAndOrient(sourceUri) ?: return@withContext null
+                val fileName = "visit-$visitId-${System.currentTimeMillis()}.jpg"
+                val outFile = File(photosDir, fileName)
+                FileOutputStream(outFile).use { out ->
+                    bitmap.compress(Bitmap.CompressFormat.JPEG, JPEG_QUALITY, out)
+                }
+                bitmap.recycle()
+                outFile.absolutePath
+            } catch (e: Exception) {
+                null
+            }
+        }
+
+    /**
+     * Creates a camera capture target for a visit photo.
+     */
+    fun createVisitCameraCaptureTarget(visitId: String): CameraCapture {
+        val fileName = "visit-$visitId-${System.currentTimeMillis()}-capture.jpg"
+        val file = File(photosDir, fileName)
+        val uri = FileProvider.getUriForFile(context, "${context.packageName}.fileprovider", file)
+        return CameraCapture(file, uri)
+    }
+
     private fun decodeAndOrient(uri: Uri): Bitmap? {
         val contentResolver = context.contentResolver
 

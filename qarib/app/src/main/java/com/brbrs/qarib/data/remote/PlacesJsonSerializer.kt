@@ -1,6 +1,7 @@
 package com.brbrs.qarib.data.remote
 
 import com.brbrs.qarib.data.local.entity.PlaceEntity
+import com.brbrs.qarib.data.local.entity.VisitEntity
 import com.brbrs.qarib.domain.model.deriveCountryFromAddress
 import org.json.JSONArray
 import org.json.JSONObject
@@ -8,47 +9,38 @@ import org.json.JSONObject
 /**
  * Serializes/deserializes the places.json sync file.
  *
- * Format (schema v4):
+ * Format (schema v5):
  * {
- *   "version": 4,
+ *   "version": 5,
  *   "places": [
  *     {
  *       "id": "...",
- *       "name": "...",
- *       "category": "restaurant",
- *       "latitude": 52.123,
- *       "longitude": 4.456,
- *       "address": "...",
- *       "note": "...",
- *       "country": "Netherlands",
- *       "visited": false,
- *       "notificationsMuted": false,
- *       "hasPhoto": false,
- *       "geofenceRadiusMeters": null,
- *       "createdAt": 1234567890,
- *       "updatedAt": 1234567890,
- *       "deleted": false
+ *       ...all v4 place fields...,
+ *       "visits": [
+ *         {
+ *           "id": "...",
+ *           "visitedAt": 1234567890,
+ *           "note": "...",
+ *           "hasPhotos": true,
+ *           "photoCount": 2,
+ *           "createdAt": 1234567890,
+ *           "updatedAt": 1234567890,
+ *           "deleted": false
+ *         }
+ *       ]
  *     }
  *   ]
  * }
  *
- * `photoPath` is a local device file path and is never written to this
- * file. `hasPhoto` instead signals whether a photo exists for this place
- * in the Qarib/photos/ folder on Nextcloud (named "{id}.jpg") — used by
- * PlacesRepository.sync() to know when to upload/download photo files.
- *
- * `geofenceRadiusMeters` is null when the place uses the global default
- * notification radius, or an explicit override in meters.
- *
- * v1-v3 files (no country/visited/notificationsMuted/hasPhoto/
- * geofenceRadiusMeters) are read with country derived from `address` and
- * the new fields defaulting to false/null.
+ * Visit photo paths are never serialized — like place photos,
+ * `hasPhotos` signals whether photos exist on Nextcloud under
+ * Qarib/visit-photos/{visitId}-{n}.jpg.
  */
 object PlacesJsonSerializer {
 
-    private const val SCHEMA_VERSION = 4
+    private const val SCHEMA_VERSION = 5
 
-    fun serialize(places: List<PlaceEntity>): String {
+    fun serialize(places: List<PlaceEntity>, visitsByPlaceId: Map<String, List<VisitEntity>> = emptyMap()): String {
         val root = JSONObject()
         root.put("version", SCHEMA_VERSION)
 
@@ -70,17 +62,30 @@ object PlacesJsonSerializer {
             obj.put("createdAt", place.createdAt)
             obj.put("updatedAt", place.updatedAt)
             obj.put("deleted", place.deleted)
+
+            // Visits for this place.
+            val visitsArray = JSONArray()
+            visitsByPlaceId[place.id]?.forEach { visit ->
+                val v = JSONObject()
+                v.put("id", visit.id)
+                v.put("visitedAt", visit.visitedAt)
+                v.put("note", visit.note)
+                v.put("hasPhotos", visit.photoPaths != "[]" && visit.photoPaths.isNotEmpty())
+                val photoCount = try { org.json.JSONArray(visit.photoPaths).length() } catch (e: Exception) { 0 }
+                v.put("photoCount", photoCount)
+                v.put("createdAt", visit.createdAt)
+                v.put("updatedAt", visit.updatedAt)
+                v.put("deleted", visit.deleted)
+                visitsArray.put(v)
+            }
+            obj.put("visits", visitsArray)
+
             array.put(obj)
         }
         root.put("places", array)
         return root.toString()
     }
 
-    /**
-     * Deserializes remote places, preserving each place's local
-     * [PlaceEntity.photoPath] from [localPhotoPaths] (keyed by place id)
-     * since the remote JSON never contains device-specific paths.
-     */
     fun deserialize(json: String, localPhotoPaths: Map<String, String> = emptyMap()): List<PlaceEntity> {
         if (json.isBlank()) return emptyList()
 
@@ -120,6 +125,49 @@ object PlacesJsonSerializer {
         return result
     }
 
+    /**
+     * Deserializes visit entries from the places.json payload.
+     * Returns a flat list of all visits across all places.
+     * [localPhotoPathsByVisitId] maps visitId → list of local photo paths.
+     */
+    fun deserializeVisits(
+        json: String,
+        localPhotoPathsByVisitId: Map<String, List<String>> = emptyMap(),
+    ): List<VisitEntity> {
+        if (json.isBlank()) return emptyList()
+        val root = JSONObject(json)
+        val places = root.optJSONArray("places") ?: JSONArray()
+        val result = mutableListOf<VisitEntity>()
+
+        for (i in 0 until places.length()) {
+            val placeObj = places.getJSONObject(i)
+            val placeId = placeObj.getString("id")
+            val visits = placeObj.optJSONArray("visits") ?: continue
+
+            for (j in 0 until visits.length()) {
+                val v = visits.getJSONObject(j)
+                val visitId = v.getString("id")
+                val localPaths = localPhotoPathsByVisitId[visitId] ?: emptyList()
+                val photoPathsJson = if (localPaths.isEmpty()) "[]" else {
+                    val arr = JSONArray(); localPaths.forEach { arr.put(it) }; arr.toString()
+                }
+                result.add(
+                    VisitEntity(
+                        id = visitId,
+                        placeId = placeId,
+                        visitedAt = v.optLong("visitedAt", System.currentTimeMillis()),
+                        note = v.optString("note", ""),
+                        photoPaths = photoPathsJson,
+                        createdAt = v.optLong("createdAt", System.currentTimeMillis()),
+                        updatedAt = v.optLong("updatedAt", System.currentTimeMillis()),
+                        deleted = v.optBoolean("deleted", false),
+                    )
+                )
+            }
+        }
+        return result
+    }
+
     /** Reads the `hasPhoto` flag for each place id from a places.json payload. */
     fun readHasPhotoFlags(json: String): Map<String, Boolean> {
         if (json.isBlank()) return emptyMap()
@@ -129,6 +177,25 @@ object PlacesJsonSerializer {
         for (i in 0 until array.length()) {
             val obj = array.getJSONObject(i)
             result[obj.getString("id")] = obj.optBoolean("hasPhoto", false)
+        }
+        return result
+    }
+
+    /** Reads visit hasPhotos + photoCount flags from a places.json payload — keyed by visitId. */
+    fun readVisitPhotoFlags(json: String): Map<String, Int> {
+        if (json.isBlank()) return emptyMap()
+        val root = JSONObject(json)
+        val places = root.optJSONArray("places") ?: JSONArray()
+        val result = mutableMapOf<String, Int>()
+        for (i in 0 until places.length()) {
+            val placeObj = places.getJSONObject(i)
+            val visits = placeObj.optJSONArray("visits") ?: continue
+            for (j in 0 until visits.length()) {
+                val v = visits.getJSONObject(j)
+                if (v.optBoolean("hasPhotos", false)) {
+                    result[v.getString("id")] = v.optInt("photoCount", 1)
+                }
+            }
         }
         return result
     }
