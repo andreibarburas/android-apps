@@ -79,4 +79,4 @@ Parts of this app were developed with AI assistance. I always disclose this upfr
 
 [GNU General Public License v3.0](LICENSE)
 
-Copyright © 2024 BARBURAS
+Copyright © 2026 BARBURAS
