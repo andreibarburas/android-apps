@@ -5,6 +5,9 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.IntentSenderRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
@@ -45,11 +48,50 @@ import java.io.File
 import java.text.SimpleDateFormat
 import java.util.*
 
+@OptIn(androidx.compose.foundation.ExperimentalFoundationApi::class)
 @Composable
 fun DetailScreen(
-    localPath: String,
+    initialPath: String,
+    allPaths: List<String> = listOf(initialPath),
     onBack: () -> Unit,
     vm: DetailViewModel = hiltViewModel(),
+) {
+    val paths        = remember(allPaths) { allPaths.ifEmpty { listOf(initialPath) } }
+    val initialIndex = remember(initialPath, paths) { paths.indexOf(initialPath).coerceAtLeast(0) }
+    val pagerState   = androidx.compose.foundation.pager.rememberPagerState(
+        initialPage = initialIndex,
+        pageCount   = { paths.size },
+    )
+
+    // Keep the VM loaded for the current page
+    val currentPath = paths.getOrNull(pagerState.currentPage) ?: initialPath
+    LaunchedEffect(currentPath) { vm.load(currentPath) }
+
+    androidx.compose.foundation.pager.HorizontalPager(
+        state    = pagerState,
+        modifier = Modifier.fillMaxSize(),
+    ) { page ->
+        val pagePath = paths.getOrNull(page) ?: return@HorizontalPager
+        // Only the current/adjacent pages need a real VM — others just show a placeholder
+        if (page == pagerState.currentPage ||
+            page == pagerState.currentPage - 1 ||
+            page == pagerState.currentPage + 1) {
+            DetailPageContent(
+                localPath = pagePath,
+                isCurrentPage = page == pagerState.currentPage,
+                onBack = onBack,
+                vm = vm,
+            )
+        }
+    }
+}
+
+@Composable
+private fun DetailPageContent(
+    localPath: String,
+    isCurrentPage: Boolean,
+    onBack: () -> Unit,
+    vm: DetailViewModel,
 ) {
     val state  by vm.uiState.collectAsState()
     val entity = state.entity
@@ -57,7 +99,9 @@ fun DetailScreen(
     val isDark  = LocalIsDark.current
     val cardTint = if (isDark) Color.White else Color.Black
 
-    LaunchedEffect(localPath) { vm.load(localPath) }
+    LaunchedEffect(localPath, isCurrentPage) {
+        if (isCurrentPage) vm.load(localPath)
+    }
 
     // Android 11+ system delete confirmation dialog
     val deleteLauncher = rememberLauncherForActivityResult(
@@ -369,7 +413,7 @@ fun DetailScreen(
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .heightIn(max = 320.dp)
+                        .heightIn(max = 640.dp)
                         .padding(horizontal = 16.dp)
                         .glassCard(cornerRadius = 16.dp, tint = cardTint)
                         .then(
@@ -382,7 +426,7 @@ fun DetailScreen(
                         Box(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .height(200.dp),
+                                .height(400.dp),
                             contentAlignment = Alignment.Center,
                         ) {
                             Column(

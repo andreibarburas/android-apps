@@ -40,7 +40,7 @@ import com.brbrs.blik.ui.theme.*
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun GalleryScreen(
-    onOpenDetail: (String) -> Unit,
+    onOpenDetail: (String, List<String>) -> Unit,
     onSettings: () -> Unit,
     vm: GalleryViewModel = hiltViewModel(),
 ) {
@@ -52,7 +52,7 @@ fun GalleryScreen(
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
 private fun GalleryContent(
-    onOpenDetail: (String) -> Unit,
+    onOpenDetail: (String, List<String>) -> Unit,
     onSettings: () -> Unit,
     vm: GalleryViewModel,
 ) {
@@ -359,7 +359,7 @@ private fun GalleryContent(
                             isSelected  = isSelected,
                             onClick     = {
                                 if (isSelecting) vm.toggleSelection(ss.localPath)
-                                else onOpenDetail(ss.localPath)
+                                else onOpenDetail(ss.localPath, state.screenshots.map { it.localPath })
                             },
                             onLongClick  = { vm.toggleSelection(ss.localPath) },
                             onUpload     = { vm.uploadSingle(ss) },

@@ -4,6 +4,14 @@ All notable changes to Blik are documented here.
 
 ---
 
+## [1.2.0] — 2026-07-16
+
+### Added
+- Screenshot detail page now shows a much larger preview with less wasted space
+- Swipe left/right on the detail page to navigate between screenshots
+
+---
+
 ## [1.1.2] — 2026-07-12
 
 ### Added

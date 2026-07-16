@@ -38,6 +38,7 @@ import com.brbrs.blik.ui.theme.LightSurface
 
 // Avoids URL-encoding content:// URIs in nav routes
 private var pendingDetailPath: String? = null
+private var pendingDetailPaths: List<String> = emptyList()
 
 object Routes {
     const val APP_LOCK  = "app_lock"
@@ -89,8 +90,9 @@ fun BlikNavHost(webDavClient: WebDavClient, imageLoader: ImageLoader) {
         // ── Main scaffold with bottom nav ─────────────────────────────────────
         composable(Routes.MAIN) {
             MainScaffold(
-                onOpenDetail = { path ->
-                    pendingDetailPath = path
+                onOpenDetail = { path, allPaths ->
+                    pendingDetailPath  = path
+                    pendingDetailPaths = allPaths
                     rootNav.navigate(Routes.DETAIL)
                 },
                 onSettings   = { rootNav.navigate(Routes.SETTINGS) },
@@ -102,7 +104,11 @@ fun BlikNavHost(webDavClient: WebDavClient, imageLoader: ImageLoader) {
         composable(Routes.DETAIL) {
             val path = pendingDetailPath
             if (path == null) rootNav.popBackStack()
-            else DetailScreen(localPath = path, onBack = { rootNav.popBackStack() })
+            else DetailScreen(
+                initialPath = path,
+                allPaths    = pendingDetailPaths,
+                onBack      = { rootNav.popBackStack() },
+            )
         }
 
         composable(Routes.SETTINGS) {
@@ -119,7 +125,7 @@ fun BlikNavHost(webDavClient: WebDavClient, imageLoader: ImageLoader) {
 
 @Composable
 private fun MainScaffold(
-    onOpenDetail: (String) -> Unit,
+    onOpenDetail: (String, List<String>) -> Unit,
     onSettings: () -> Unit,
     webDavClient: WebDavClient,
     imageLoader: ImageLoader,
