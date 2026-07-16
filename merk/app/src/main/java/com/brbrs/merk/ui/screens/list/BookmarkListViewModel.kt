@@ -8,6 +8,7 @@ import com.brbrs.merk.data.local.FolderEntity
 import com.brbrs.merk.data.repository.BookmarkRepository
 import com.brbrs.merk.tasks.TasksPreference
 import com.brbrs.merk.ui.theme.ThemeRepository
+import com.brbrs.merk.ui.theme.ViewModePreference
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.*
@@ -27,6 +28,7 @@ data class ListUiState(
     val isDark: Boolean                  = true,
     val serverUrl: String                = "",
     val authHeader: String               = "",
+    val useCardView: Boolean             = false,
 )
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -36,6 +38,7 @@ class BookmarkListViewModel @Inject constructor(
     private val tasksPref: TasksPreference,
     private val themeRepo: ThemeRepository,
     private val authManager: AuthManager,
+    private val viewModePref: ViewModePreference,
 ) : ViewModel() {
 
     private val _searchQuery    = MutableStateFlow("")
@@ -65,9 +68,9 @@ class BookmarkListViewModel @Inject constructor(
     }
 
     val uiState: StateFlow<ListUiState> = combine(
-        _context, authManager.credentials, repo.observeFolders(),
-    ) { ctx, creds, folders ->
-        ctx.copy(creds = creds, folders = folders)
+        _context, authManager.credentials, repo.observeFolders(), viewModePref.useCardView,
+    ) { ctx, creds, folders, cardView ->
+        ctx.copy(creds = creds, folders = folders, cardView = cardView)
     }.flatMapLatest { ctx ->
         val bookmarkFlow = when {
             ctx.query.isNotBlank()  -> repo.search(ctx.query)
@@ -90,6 +93,7 @@ class BookmarkListViewModel @Inject constructor(
                 authHeader       = ctx.creds?.let {
                     Credentials.basic(it.username, it.appPassword)
                 } ?: "",
+                useCardView      = ctx.cardView,
             )
         }
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), ListUiState())
@@ -125,6 +129,10 @@ class BookmarkListViewModel @Inject constructor(
         viewModelScope.launch { themeRepo.setDark(!uiState.value.isDark) }
     }
 
+    fun toggleViewMode() {
+        viewModelScope.launch { viewModePref.setUseCardView(!uiState.value.useCardView) }
+    }
+
     fun sync() {
         if (_isSyncing.value) return
         viewModelScope.launch {
@@ -149,4 +157,5 @@ private data class QueryContext(
     val dark:     Boolean,
     val creds:    com.brbrs.merk.auth.AuthCredentials?,
     val folders:  List<com.brbrs.merk.data.local.FolderEntity> = emptyList(),
+    val cardView: Boolean = false,
 )

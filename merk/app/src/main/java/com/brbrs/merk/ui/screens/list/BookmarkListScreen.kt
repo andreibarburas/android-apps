@@ -30,6 +30,7 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.brbrs.merk.data.local.BookmarkEntity
 import com.brbrs.merk.ui.components.FaviconImage
+import com.brbrs.merk.ui.components.PreviewImage
 import com.brbrs.merk.ui.components.RemindMeButton
 import com.brbrs.merk.ui.theme.*
 
@@ -112,6 +113,13 @@ fun BookmarkListScreen(
                             Icon(Icons.Outlined.Sync, "Sync",
                                 tint = MaterialTheme.colorScheme.onSurfaceVariant)
                         }
+                    }
+                    IconButton(onClick = vm::toggleViewMode) {
+                        Icon(
+                            if (state.useCardView) Icons.Outlined.ViewList else Icons.Outlined.ViewAgenda,
+                            contentDescription = if (state.useCardView) "Switch to list view" else "Switch to card view",
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
                     }
                     IconButton(onClick = vm::toggleTheme) {
                         Icon(
@@ -266,17 +274,30 @@ fun BookmarkListScreen(
                         )
                     }
                     items(state.bookmarks, key = { it.id }) { bookmark ->
-                        BookmarkCard(
-                            bookmark         = bookmark,
-                            tasksEnabled     = state.tasksEnabled,
-                            isDark           = isDark,
-                            serverUrl        = state.serverUrl,
-                            authHeader       = state.authHeader,
-                            selectedFolderId = state.selectedFolderId,
-                            onClick          = { onOpen(bookmark.id) },
-                            onEdit           = { onEdit(bookmark.id) },
-                            onDelete         = { vm.onDeleteBookmark(bookmark.id) },
-                        )
+                        if (state.useCardView) {
+                            BookmarkPreviewCard(
+                                bookmark         = bookmark,
+                                isDark           = isDark,
+                                serverUrl        = state.serverUrl,
+                                authHeader       = state.authHeader,
+                                selectedFolderId = state.selectedFolderId,
+                                onClick          = { onOpen(bookmark.id) },
+                                onEdit           = { onEdit(bookmark.id) },
+                                onDelete         = { vm.onDeleteBookmark(bookmark.id) },
+                            )
+                        } else {
+                            BookmarkCard(
+                                bookmark         = bookmark,
+                                tasksEnabled     = state.tasksEnabled,
+                                isDark           = isDark,
+                                serverUrl        = state.serverUrl,
+                                authHeader       = state.authHeader,
+                                selectedFolderId = state.selectedFolderId,
+                                onClick          = { onOpen(bookmark.id) },
+                                onEdit           = { onEdit(bookmark.id) },
+                                onDelete         = { vm.onDeleteBookmark(bookmark.id) },
+                            )
+                        }
                     }
                     item { Spacer(Modifier.height(80.dp)) }
                 }
@@ -508,6 +529,149 @@ private fun BookmarkCard(
                             onClick     = { showMenu = false; onDelete() },
                             leadingIcon = { Icon(Icons.Outlined.Delete, null, tint = MaterialTheme.colorScheme.error) },
                         )
+                    }
+                }
+            }
+        }
+    }
+}
+
+// ── Bookmark preview card (card view mode) ────────────────────────────────────
+
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+private fun BookmarkPreviewCard(
+    bookmark: BookmarkEntity,
+    isDark: Boolean,
+    serverUrl: String,
+    authHeader: String,
+    selectedFolderId: Long?,
+    onClick: () -> Unit,
+    onEdit: () -> Unit,
+    onDelete: () -> Unit,
+) {
+    var showMenu by remember { mutableStateOf(false) }
+    val tagList  = remember(bookmark.tags) {
+        bookmark.tags.split(",").map { it.trim() }.filter { it.isNotBlank() }
+    }
+    val showFolderPill = selectedFolderId != null && bookmark.folderName.isNotBlank()
+
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .merkCard(isDark = isDark)
+            .combinedClickable(onClick = onClick, onLongClick = { showMenu = true }),
+    ) {
+        PreviewImage(
+            bookmarkId = bookmark.id,
+            serverUrl  = serverUrl,
+            authHeader = authHeader,
+            title      = bookmark.title.ifBlank { bookmark.url },
+            height     = 160.dp,
+            modifier   = Modifier
+                .fillMaxWidth()
+                .height(160.dp),
+        )
+
+        Column(modifier = Modifier.padding(horizontal = 14.dp, vertical = 12.dp)) {
+            Row(verticalAlignment = Alignment.Top) {
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text     = bookmark.title.ifBlank { bookmark.url },
+                        style    = MaterialTheme.typography.titleLarge,
+                        color    = MaterialTheme.colorScheme.onSurface,
+                        maxLines = 2,
+                        overflow = TextOverflow.Ellipsis,
+                    )
+                    if (bookmark.description.isNotBlank()) {
+                        Spacer(Modifier.height(3.dp))
+                        Text(
+                            text     = bookmark.description,
+                            style    = MaterialTheme.typography.bodyMedium,
+                            color    = MaterialTheme.colorScheme.onSurfaceVariant,
+                            maxLines = 2,
+                            overflow = TextOverflow.Ellipsis,
+                        )
+                    }
+                }
+                Box {
+                    IconButton(onClick = { showMenu = true }, modifier = Modifier.size(32.dp)) {
+                        Icon(Icons.Outlined.MoreVert, null,
+                            tint     = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.size(18.dp))
+                    }
+                    DropdownMenu(expanded = showMenu, onDismissRequest = { showMenu = false }) {
+                        DropdownMenuItem(
+                            text        = { Text("Edit") },
+                            onClick     = { showMenu = false; onEdit() },
+                            leadingIcon = { Icon(Icons.Outlined.Edit, null) },
+                        )
+                        DropdownMenuItem(
+                            text        = { Text("Delete", color = MaterialTheme.colorScheme.error) },
+                            onClick     = { showMenu = false; onDelete() },
+                            leadingIcon = { Icon(Icons.Outlined.Delete, null, tint = MaterialTheme.colorScheme.error) },
+                        )
+                    }
+                }
+            }
+            Spacer(Modifier.height(4.dp))
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(6.dp),
+            ) {
+                FaviconImage(
+                    bookmarkId = bookmark.id,
+                    serverUrl  = serverUrl,
+                    authHeader = authHeader,
+                    title      = bookmark.title.ifBlank { bookmark.url },
+                    size       = 16.dp,
+                )
+                Text(
+                    text     = Uri.parse(bookmark.url).host ?: bookmark.url,
+                    style    = MaterialTheme.typography.labelMedium,
+                    color    = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                )
+            }
+            if (tagList.isNotEmpty() || showFolderPill) {
+                Spacer(Modifier.height(7.dp))
+                Row(horizontalArrangement = Arrangement.spacedBy(5.dp)) {
+                    if (showFolderPill) {
+                        Row(
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(6.dp))
+                                .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.11f))
+                                .padding(horizontal = 7.dp, vertical = 3.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(4.dp),
+                        ) {
+                            Icon(
+                                Icons.Outlined.Folder,
+                                contentDescription = null,
+                                tint     = MaterialTheme.colorScheme.primary.copy(alpha = 0.85f),
+                                modifier = Modifier.size(11.dp),
+                            )
+                            Text(
+                                bookmark.folderName,
+                                style = MaterialTheme.typography.labelMedium,
+                                color = MaterialTheme.colorScheme.primary.copy(alpha = 0.85f),
+                            )
+                        }
+                    }
+                    tagList.take(4).forEach { tag ->
+                        Box(
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(6.dp))
+                                .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.11f))
+                                .padding(horizontal = 7.dp, vertical = 3.dp),
+                        ) {
+                            Text(
+                                tag,
+                                style = MaterialTheme.typography.labelMedium,
+                                color = MaterialTheme.colorScheme.primary.copy(alpha = 0.85f),
+                            )
+                        }
                     }
                 }
             }
