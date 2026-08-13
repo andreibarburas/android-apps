@@ -2,6 +2,9 @@
 
 A suite of beautiful, privacy-focused Android apps built for self-hosted infrastructure. All apps connect to your own server; no data collection, no ads, no third-party services.
 
+## Notice
+I am starting to create individual Gits for each app. As a result, the app directories in this Git will slowly but surely be deleted.
+
 ## Apps
 
 | App | Description | Package | Status |
@@ -11,7 +14,7 @@ A suite of beautiful, privacy-focused Android apps built for self-hosted infrast
 | [Nóta](nota/) | Nextcloud Notes client | 'com.brbrs.nota' | ✅ [Live on Google Play](https://play.google.com/store/apps/details?id=com.brbrs.nota) |
 | [Qarib](qarib/) | A "want to visit" places app | 'com.brbrs.qarib' | ✅ [Live on Google Play](https://play.google.com/store/apps/details?id=com.brbrs.qarib) |
 | [Runa](runa/) | A personal journal | 'com.brbrs.runa' | ✅ [Live on Google Play](https://play.google.com/store/apps/details?id=com.brbrs.runa) |
-| [Vinci](vinci/) | Nextcloud Personal CRM | 'com.brbrs.vinci' | ✅ [Live on Google Play](https://play.google.com/store/apps/details?id=com.brbrs.vinci) |
+| [Vinci](https://github.com/andreibarburas/vinci-android) | Nextcloud Personal CRM | 'com.brbrs.vinci' | ✅ [Live on Google Play](https://play.google.com/store/apps/details?id=com.brbrs.vinci) |
 
 ## Philosophy
 
