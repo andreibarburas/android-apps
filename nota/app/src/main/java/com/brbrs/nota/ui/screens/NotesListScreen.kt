@@ -15,6 +15,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.PushPin
 import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.*
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
+import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -44,6 +46,7 @@ import com.brbrs.nota.ui.viewmodels.NotesListViewModel
 import java.text.SimpleDateFormat
 import java.util.*
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun NotesListScreen(
     onNoteClick: (Long) -> Unit,
@@ -55,6 +58,7 @@ fun NotesListScreen(
     val imageLoader by viewModel.imageLoader.collectAsState()
     val isDark by viewModel.isDark.collectAsState()
     val tasksEnabled by viewModel.tasksEnabled.collectAsState()
+    val compactMode by viewModel.compactMode.collectAsState()
     val customFont = LocalCustomFontEnabled.current
     val noteTitleFont = if (customFont) DMSerifDisplayFontFamily else FontFamily.Serif
     val noteBodyFont  = if (customFont) InterTightFontFamily     else FontFamily.SansSerif
@@ -129,6 +133,13 @@ fun NotesListScreen(
                     }
                     IconButton(onClick = viewModel::sync) {
                         Icon(Icons.Outlined.Sync, "Sync", tint = MaterialTheme.colorScheme.onSurfaceVariant)
+                    }
+                    IconButton(onClick = viewModel::toggleCompactMode) {
+                        Icon(
+                            if (compactMode) Icons.Outlined.ViewAgenda else Icons.Outlined.ViewStream,
+                            contentDescription = if (compactMode) "Show previews" else "Compact view",
+                            tint = if (compactMode) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
                     }
                     IconButton(onClick = viewModel::toggleTheme) {
                         Icon(
@@ -226,6 +237,11 @@ fun NotesListScreen(
             }
 
             // ── Notes list ────────────────────────────────────────────────────
+            PullToRefreshBox(
+                isRefreshing = uiState.isSyncing,
+                onRefresh = viewModel::sync,
+                modifier = Modifier.fillMaxSize(),
+            ) {
             LazyColumn(
                 contentPadding = PaddingValues(horizontal = 16.dp, vertical = 4.dp),
                 verticalArrangement = Arrangement.spacedBy(10.dp),
@@ -241,6 +257,7 @@ fun NotesListScreen(
                             note = note,
                             isPrimary = true,
                             isDark = isDark,
+                            compactMode = compactMode,
                             imageLoader = imageLoader,
                             tasksEnabled = tasksEnabled,
                             onClick = { onNoteClick(note.id) },
@@ -254,6 +271,7 @@ fun NotesListScreen(
                         note = note,
                         isPrimary = false,
                         isDark = isDark,
+                        compactMode = compactMode,
                         imageLoader = imageLoader,
                         tasksEnabled = tasksEnabled,
                         onClick = { onNoteClick(note.id) },
@@ -261,6 +279,7 @@ fun NotesListScreen(
                 }
 
                 item { Spacer(Modifier.height(80.dp)) }
+            }
             }
         }
 
@@ -336,6 +355,7 @@ private fun NoteCard(
     note: NoteEntity,
     isPrimary: Boolean,
     isDark: Boolean,
+    compactMode: Boolean,
     imageLoader: coil.ImageLoader?,
     tasksEnabled: Boolean,
     onClick: () -> Unit,
@@ -351,113 +371,159 @@ private fun NoteCard(
     Box(
         modifier = cardModifier
             .clickable(onClick = onClick)
-            .padding(horizontal = 18.dp, vertical = 14.dp),
+            .padding(
+                horizontal = 18.dp,
+                vertical = if (compactMode) 10.dp else 14.dp,
+            ),
     ) {
-        Column {
-            // ── Title row ─────────────────────────────────────────────────────
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.Top,
-            ) {
-                Text(
-                    note.title.ifBlank { stringResource(R.string.untitled) },
-                    style = if (noteTitleFont != null)
-                        MaterialTheme.typography.titleLarge.copy(fontFamily = noteTitleFont)
-                    else
-                        MaterialTheme.typography.titleLarge,
-                    color = MaterialTheme.colorScheme.onSurface,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                    modifier = Modifier.weight(1f),
-                )
-                if (note.favorite) {
-                    Icon(
-                        Icons.Filled.PushPin,
-                        null,
-                        tint = GreenPrimary.copy(alpha = 0.6f),
-                        modifier = Modifier.size(16.dp).padding(start = 4.dp),
-                    )
-                }
-            }
-
-            Spacer(Modifier.height(4.dp))
-
-            // ── Content / locked ──────────────────────────────────────────────
-            if (note.isLocked) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(36.dp)
-                        .clip(RoundedCornerShape(8.dp))
-                        .background(GreenPrimary.copy(alpha = 0.05f)),
-                    contentAlignment = Alignment.Center,
-                ) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(6.dp),
-                    ) {
-                        Icon(
-                            Icons.Outlined.Lock,
-                            contentDescription = "Locked",
-                            tint = GreenPrimary.copy(alpha = 0.5f),
-                            modifier = Modifier.size(14.dp),
-                        )
-                        Text(
-                            stringResource(R.string.protected_note),
-                            style = MaterialTheme.typography.labelMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        )
-                    }
-                }
-            } else {
-                val previewText = note.content
-                    .replace(Regex("#+\\s*"), "")
-                    .replace(Regex("""!\[[^\]]*\]\([^)]+\)"""), stringResource(R.string.image_placeholder))
-                    .lines()
-                    .dropWhile { it.trim() == note.title.trim() || it.isBlank() }
-                    .joinToString(" ")
-                    .trim()
-                    .take(120)
-                if (previewText.isNotBlank()) {
-                    Text(
-                        previewText,
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        maxLines = 2,
-                        overflow = TextOverflow.Ellipsis,
-                    )
-                }
-                NoteImageStrip(
-                    markdown = note.content,
-                    imageLoader = imageLoader,
-                    maxImages = 1,
-                    modifier = Modifier.padding(top = 8.dp),
-                )
-            }
-
-            Spacer(Modifier.height(10.dp))
-
-            // ── Footer row ────────────────────────────────────────────────────
+        if (compactMode) {
+            // ── Compact: title + category + date ──────────────────────────────
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                Text(
-                    formatTimestamp(note.modified),
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    AddToTasksButton(
-                        noteTitle    = note.title,
-                        noteContent  = note.content,
-                        tasksEnabled = tasksEnabled,
-                        iconOnly     = true,
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.weight(1f),
+                    horizontalArrangement = Arrangement.spacedBy(6.dp),
+                ) {
+                    if (note.isLocked) {
+                        Icon(Icons.Outlined.Lock, null, tint = GreenPrimary.copy(alpha = 0.5f), modifier = Modifier.size(13.dp))
+                    }
+                    if (note.favorite) {
+                        Icon(Icons.Filled.PushPin, null, tint = GreenPrimary.copy(alpha = 0.6f), modifier = Modifier.size(13.dp))
+                    }
+                    Text(
+                        note.title.ifBlank { stringResource(R.string.untitled) },
+                        style = if (noteTitleFont != null)
+                            MaterialTheme.typography.titleMedium.copy(fontFamily = noteTitleFont)
+                        else
+                            MaterialTheme.typography.titleMedium,
+                        color = MaterialTheme.colorScheme.onSurface,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
                     )
+                }
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(6.dp),
+                ) {
                     if (note.category.isNotBlank()) {
                         CategoryBadge(category = note.category, isDark = isDark)
+                    }
+                    Text(
+                        formatTimestamp(note.modified),
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+            }
+        } else {
+            // ── Full: existing card layout ─────────────────────────────────
+            Column {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.Top,
+                ) {
+                    Text(
+                        note.title.ifBlank { stringResource(R.string.untitled) },
+                        style = if (noteTitleFont != null)
+                            MaterialTheme.typography.titleLarge.copy(fontFamily = noteTitleFont)
+                        else
+                            MaterialTheme.typography.titleLarge,
+                        color = MaterialTheme.colorScheme.onSurface,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.weight(1f),
+                    )
+                    if (note.favorite) {
+                        Icon(
+                            Icons.Filled.PushPin,
+                            null,
+                            tint = GreenPrimary.copy(alpha = 0.6f),
+                            modifier = Modifier.size(16.dp).padding(start = 4.dp),
+                        )
+                    }
+                }
+
+                Spacer(Modifier.height(4.dp))
+
+                if (note.isLocked) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(36.dp)
+                            .clip(RoundedCornerShape(8.dp))
+                            .background(GreenPrimary.copy(alpha = 0.05f)),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(6.dp),
+                        ) {
+                            Icon(
+                                Icons.Outlined.Lock,
+                                contentDescription = "Locked",
+                                tint = GreenPrimary.copy(alpha = 0.5f),
+                                modifier = Modifier.size(14.dp),
+                            )
+                            Text(
+                                stringResource(R.string.protected_note),
+                                style = MaterialTheme.typography.labelMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                        }
+                    }
+                } else {
+                    val previewText = note.content
+                        .replace(Regex("#+\\s*"), "")
+                        .replace(Regex("""!\[[^\]]*\]\([^)]+\)"""), stringResource(R.string.image_placeholder))
+                        .lines()
+                        .dropWhile { it.trim() == note.title.trim() || it.isBlank() }
+                        .joinToString(" ")
+                        .trim()
+                        .take(120)
+                    if (previewText.isNotBlank()) {
+                        Text(
+                            previewText,
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            maxLines = 2,
+                            overflow = TextOverflow.Ellipsis,
+                        )
+                    }
+                    NoteImageStrip(
+                        markdown = note.content,
+                        imageLoader = imageLoader,
+                        maxImages = 1,
+                        modifier = Modifier.padding(top = 8.dp),
+                    )
+                }
+
+                Spacer(Modifier.height(10.dp))
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Text(
+                        formatTimestamp(note.modified),
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        AddToTasksButton(
+                            noteTitle    = note.title,
+                            noteContent  = note.content,
+                            tasksEnabled = tasksEnabled,
+                            iconOnly     = true,
+                        )
+                        if (note.category.isNotBlank()) {
+                            CategoryBadge(category = note.category, isDark = isDark)
+                        }
                     }
                 }
             }

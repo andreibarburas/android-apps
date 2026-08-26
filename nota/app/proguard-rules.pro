@@ -1,20 +1,18 @@
-# Retrofit
--keepattributes Signature
--keepattributes *Annotation*
--keep class retrofit2.** { *; }
--keep interface retrofit2.** { *; }
--keepclassmembernames interface * {
-    @retrofit2.http.* <methods>;
-}
-
-# Gson / DTOs
--keep class com.barburas.nota.network.** { *; }
--keep class com.barburas.nota.auth.** { *; }
-
-# OkHttp
+# ── OkHttp + Okio ─────────────────────────────────────────────────────────────
 -dontwarn okhttp3.**
 -dontwarn okio.**
 
-# Room
+# ── org.json ──────────────────────────────────────────────────────────────────
+# Used directly for Nextcloud API parsing — keep to avoid R8 ClassCastException
+-keep class org.json.** { *; }
+
+# ── Room ──────────────────────────────────────────────────────────────────────
 -keep class * extends androidx.room.RoomDatabase
 -keep @androidx.room.Entity class *
+
+# ── Hilt ──────────────────────────────────────────────────────────────────────
+-keepattributes *Annotation*
+
+# ── Kotlin coroutines ─────────────────────────────────────────────────────────
+-keepnames class kotlinx.coroutines.internal.MainDispatcherFactory {}
+-keepnames class kotlinx.coroutines.CoroutineExceptionHandler {}

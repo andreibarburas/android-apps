@@ -25,14 +25,17 @@ class ImageUploadRepository @Inject constructor(
     @ApplicationContext private val context: Context,
     private val authRepository: AuthRepository,
     private val httpClient: OkHttpClient,
+    private val attachmentFolderPreference: AttachmentFolderPreference,
 ) {
     /**
-     * Uploads [uri] to /Nota Attachments/ on Nextcloud via WebDAV
+     * Uploads [uri] to the configured attachment folder on Nextcloud via WebDAV
      * and returns a markdown image string pointing to the file.
      */
     suspend fun uploadImage(uri: Uri): UploadResult = withContext(Dispatchers.IO) {
         val session = authRepository.session.first()
             ?: return@withContext UploadResult.Error("Not logged in")
+
+        val folderName = attachmentFolderPreference.folderName.first()
 
         // 1. Resolve filename and mime type
         val filename = resolveFilename(uri) ?: "image_${System.currentTimeMillis()}.jpg"
@@ -48,7 +51,8 @@ class ImageUploadRepository @Inject constructor(
 
         // 3. Ensure the upload folder exists (MKCOL is idempotent — 405 = already exists)
         val base      = session.serverUrl.trimEnd('/')
-        val folderUrl = "$base/remote.php/dav/files/${session.username}/Nota%20Attachments"
+        val encodedFolder = Uri.encode(folderName)
+        val folderUrl = "$base/remote.php/dav/files/${session.username}/$encodedFolder"
         val client    = authedClient(session)
 
         runCatching {
@@ -79,7 +83,7 @@ class ImageUploadRepository @Inject constructor(
         }
 
         // 5. Build a direct download URL for the markdown image tag
-        val downloadUrl = "$base/remote.php/dav/files/${session.username}/Nota%20Attachments/${Uri.encode(filename)}"
+        val downloadUrl = "$base/remote.php/dav/files/${session.username}/$encodedFolder/${Uri.encode(filename)}"
         UploadResult.Success("![$filename]($downloadUrl)")
     }
 

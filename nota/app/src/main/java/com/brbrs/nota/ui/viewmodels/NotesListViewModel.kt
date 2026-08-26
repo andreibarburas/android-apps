@@ -10,6 +10,7 @@ import com.brbrs.nota.data.NoteEntity
 import com.brbrs.nota.network.SyncRepository
 import com.brbrs.nota.tasks.TasksPreference
 import com.brbrs.nota.ui.theme.ThemeRepository
+import com.brbrs.nota.ui.theme.ViewModePreference
 import com.brbrs.nota.util.buildAuthenticatedImageLoader
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -37,6 +38,7 @@ class NotesListViewModel @Inject constructor(
     private val httpClient: OkHttpClient,
     private val themeRepository: ThemeRepository,
     private val tasksPref: TasksPreference,
+    private val viewModePreference: ViewModePreference,
 ) : ViewModel() {
 
     private val _searchQuery = MutableStateFlow("")
@@ -55,8 +57,15 @@ class NotesListViewModel @Inject constructor(
     val tasksEnabled: StateFlow<Boolean> = tasksPref.enabled
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), false)
 
+    val compactMode: StateFlow<Boolean> = viewModePreference.compactMode
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), false)
+
     fun toggleTheme() {
         viewModelScope.launch { themeRepository.setDark(!isDark.value) }
+    }
+
+    fun toggleCompactMode() {
+        viewModelScope.launch { viewModePreference.setCompactMode(!compactMode.value) }
     }
 
     val uiState: StateFlow<NotesListUiState> = combine(

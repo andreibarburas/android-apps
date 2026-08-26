@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.brbrs.nota.auth.AuthRepository
+import com.brbrs.nota.network.AttachmentFolderPreference
 import com.brbrs.nota.network.SyncRepository
 import com.brbrs.nota.tasks.TasksOrgHelper
 import com.brbrs.nota.tasks.TasksPreference
@@ -28,6 +29,7 @@ data class SettingsUiState(
     val tasksInstalled: Boolean = false,
     val textScale: TextScale = TextScale.DEFAULT,
     val customFontEnabled: Boolean = false,
+    val attachmentFolder: String = AttachmentFolderPreference.DEFAULT_FOLDER,
 )
 
 @HiltViewModel
@@ -38,6 +40,7 @@ class SettingsViewModel @Inject constructor(
     private val tasksPref: TasksPreference,
     private val textScalePreference: TextScalePreference,
     private val fontPreference: FontPreference,
+    private val attachmentFolderPreference: AttachmentFolderPreference,
 ) : ViewModel() {
 
     private val _lastSynced = MutableStateFlow("Never")
@@ -55,22 +58,24 @@ class SettingsViewModel @Inject constructor(
         },
         textScalePreference.scale,
         fontPreference.customFontEnabled,
-    ) { arr, textScale, customFont ->
+        attachmentFolderPreference.folderName,
+    ) { arr, textScale, customFont, attachFolder ->
         val session   = arr[0] as com.brbrs.nota.auth.NotaSession?
         val appLock   = arr[1] as Boolean
         val synced    = arr[2] as String
         val loggedOut = arr[3] as Boolean
         val tasks     = arr[4] as Boolean
         SettingsUiState(
-            serverUrl          = session?.serverUrl ?: "",
-            username           = session?.username  ?: "",
-            appLockEnabled     = appLock,
-            lastSynced         = synced,
-            loggedOut          = loggedOut,
-            tasksEnabled       = tasks,
-            tasksInstalled     = TasksOrgHelper.isInstalled(context),
-            textScale          = textScale,
-            customFontEnabled  = customFont,
+            serverUrl         = session?.serverUrl ?: "",
+            username          = session?.username  ?: "",
+            appLockEnabled    = appLock,
+            lastSynced        = synced,
+            loggedOut         = loggedOut,
+            tasksEnabled      = tasks,
+            tasksInstalled    = TasksOrgHelper.isInstalled(context),
+            textScale         = textScale,
+            customFontEnabled = customFont,
+            attachmentFolder  = attachFolder,
         )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), SettingsUiState())
 
@@ -88,6 +93,10 @@ class SettingsViewModel @Inject constructor(
 
     fun setCustomFont(enabled: Boolean) {
         viewModelScope.launch { fontPreference.setCustomFontEnabled(enabled) }
+    }
+
+    fun setAttachmentFolder(name: String) {
+        viewModelScope.launch { attachmentFolderPreference.setFolderName(name) }
     }
 
     fun sync() {

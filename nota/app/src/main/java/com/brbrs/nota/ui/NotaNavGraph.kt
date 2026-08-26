@@ -32,6 +32,7 @@ sealed class Screen(val route: String) {
 fun NotaNavGraph(
     sharedText: String? = null,
     sharedImageUri: String? = null,
+    onShareConsumed: () -> Unit = {},
 ) {
     val navController = rememberNavController()
 
@@ -43,6 +44,7 @@ fun NotaNavGraph(
                 sharedImageUri = sharedImageUri ?: "",
             )
         )
+        onShareConsumed()
     }
 
     NavHost(navController = navController, startDestination = Screen.AppLock.route) {

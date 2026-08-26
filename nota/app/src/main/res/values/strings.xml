@@ -26,6 +26,10 @@
     <string name="title_placeholder">Title</string>
     <string name="start_writing">Start writing…</string>
     <string name="uploading_image">Uploading image to Nextcloud…</string>
+    <string name="insert_image">Insert image</string>
+    <string name="section_notes">Notes</string>
+    <string name="attachment_folder">Attachment folder</string>
+    <string name="attachment_folder_description">Nextcloud folder where images are uploaded</string>
     <string name="note_locked">Note Locked</string>
     <string name="note_locked_description">This note is protected.\nUse your fingerprint to unlock.</string>
     <string name="unlock_note">Unlock note</string>

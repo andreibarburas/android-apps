@@ -91,7 +91,7 @@ fun LoginScreen(
                 value = uiState.serverUrl,
                 onValueChange = viewModel::onServerUrlChanged,
                 label = { Text("Nextcloud URL") },
-                placeholder = { Text("https://cloud.yourdomain.com") },
+                placeholder = { Text("https://cloud.yourdomain.com or http://") },
                 singleLine = true,
                 keyboardOptions = KeyboardOptions(
                     keyboardType = KeyboardType.Uri,

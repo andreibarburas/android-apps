@@ -1,11 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-    Allows connections to self-hosted Nextcloud instances that use
-    certificates signed by user-installed CAs (e.g. Let's Encrypt on
-    internal domains, or a private CA on the homelab).
+    Allows connections to self-hosted Nextcloud instances that use:
+    - Certificates signed by user-installed CAs (e.g. Let's Encrypt on
+      internal domains, or a private CA on the homelab)
+    - Plain HTTP for setups secured at the network level via Tailscale,
+      Netbird, or other zero-trust / VPN tools
 -->
 <network-security-config>
-    <base-config cleartextTrafficPermitted="false">
+    <base-config cleartextTrafficPermitted="true">
         <trust-anchors>
             <certificates src="system" />
             <certificates src="user" />

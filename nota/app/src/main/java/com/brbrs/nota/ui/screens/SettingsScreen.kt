@@ -176,6 +176,58 @@ fun SettingsScreen(
 
             Spacer(Modifier.height(24.dp))
 
+            // ── Notes ─────────────────────────────────────────────────────────
+            SettingsSectionLabel(stringResource(R.string.section_notes))
+            Spacer(Modifier.height(8.dp))
+            SettingsCard {
+                var folderEdit by remember { mutableStateOf(uiState.attachmentFolder) }
+                LaunchedEffect(uiState.attachmentFolder) { folderEdit = uiState.attachmentFolder }
+
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 12.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                ) {
+                    Icon(
+                        Icons.Outlined.FolderOpen,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.size(20.dp),
+                    )
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(
+                            stringResource(R.string.attachment_folder),
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurface,
+                        )
+                        Text(
+                            stringResource(R.string.attachment_folder_description),
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                        Spacer(Modifier.height(6.dp))
+                        OutlinedTextField(
+                            value = folderEdit,
+                            onValueChange = { folderEdit = it },
+                            singleLine = true,
+                            textStyle = MaterialTheme.typography.bodySmall,
+                            modifier = Modifier.fillMaxWidth(),
+                            trailingIcon = {
+                                if (folderEdit != uiState.attachmentFolder) {
+                                    IconButton(onClick = { viewModel.setAttachmentFolder(folderEdit) }) {
+                                        Icon(Icons.Outlined.Check, "Save", tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(18.dp))
+                                    }
+                                }
+                            },
+                        )
+                    }
+                }
+            }
+
+            Spacer(Modifier.height(24.dp))
+
             // ── Integrations ──────────────────────────────────────────────────
             SettingsSectionLabel(stringResource(R.string.section_integrations))
             Spacer(Modifier.height(8.dp))
@@ -309,7 +361,7 @@ fun SettingsScreen(
             Spacer(Modifier.height(32.dp))
 
             Text(
-                stringResource(R.string.app_footer, "1.3.1"),
+                stringResource(R.string.app_footer, "1.4.0"),
                 style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 textAlign = TextAlign.Center,

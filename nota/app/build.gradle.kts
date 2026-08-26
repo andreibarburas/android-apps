@@ -8,14 +8,14 @@ plugins {
 
 android {
     namespace = "com.brbrs.nota"
-    compileSdk = 35
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "com.brbrs.nota"
         minSdk = 28          // BiometricPrompt stable + BlurMaskFilter
-        targetSdk = 35
-        versionCode = 10
-        versionName = "1.3.1"
+        targetSdk = 36
+        versionCode = 14
+        versionName = "1.4.0"
     }
 
     buildTypes {

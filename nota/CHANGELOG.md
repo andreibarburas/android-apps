@@ -2,6 +2,22 @@
 
 All notable changes to Nóta are documented here.
 
+## [1.4.0] - 2026-08-26
+
+### Added
+- Image picker in the editor toolbar — insert images directly into notes
+- Images upload to Nextcloud and are inserted at the cursor position
+- Preview mode renders images inline, in document order
+- Configurable attachment folder in Settings → Notes (default: Nota Attachments)
+- Pull to refresh on the notes list
+- Compact view toggle — tap the list icon in the top bar to switch between full cards and title-only rows
+
+### Fixed
+- Notes now save correctly when tapping the back button
+- Sharing an image from another app no longer creates two notes
+
+---
+
 ## [1.3.1] - 2026-07-12
 
 ### Added

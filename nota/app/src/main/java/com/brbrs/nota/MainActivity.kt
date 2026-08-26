@@ -26,14 +26,17 @@ class MainActivity : FragmentActivity() {
     @Inject lateinit var textScalePreference: TextScalePreference
     @Inject lateinit var fontPreference: FontPreference
 
-    var sharedImageUri: Uri? = null
+    private val _sharedText     = mutableStateOf<String?>(null)
+    private val _sharedImageUri = mutableStateOf<String?>(null)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
 
-        val sharedText = resolveSharedText(intent)
-        sharedImageUri = resolveSharedImage(intent)
+        // Only consume the share intent on fresh launch (not config change)
+        if (savedInstanceState == null) {
+            consumeShareIntent(intent)
+        }
 
         setContent {
             val isDark by themeRepository.isDark.collectAsStateWithLifecycle(initialValue = true)
@@ -45,12 +48,27 @@ class MainActivity : FragmentActivity() {
             NotaTheme(isDark = isDark, textScaleMultiplier = textScale.multiplier, customFont = customFont) {
                 Surface(modifier = Modifier.fillMaxSize()) {
                     NotaNavGraph(
-                        sharedText     = sharedText,
-                        sharedImageUri = sharedImageUri?.toString(),
+                        sharedText     = _sharedText.value,
+                        sharedImageUri = _sharedImageUri.value,
+                        onShareConsumed = {
+                            _sharedText.value     = null
+                            _sharedImageUri.value = null
+                        },
                     )
                 }
             }
         }
+    }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        setIntent(intent)
+        consumeShareIntent(intent)
+    }
+
+    private fun consumeShareIntent(intent: Intent?) {
+        _sharedText.value     = resolveSharedText(intent)
+        _sharedImageUri.value = resolveSharedImage(intent)?.toString()
     }
 
     private fun resolveSharedText(intent: Intent?): String? {
@@ -64,6 +82,7 @@ class MainActivity : FragmentActivity() {
         if (intent?.action != Intent.ACTION_SEND) return null
         val mimeType = intent.type ?: return null
         if (!mimeType.startsWith("image/")) return null
+        @Suppress("DEPRECATION")
         return intent.getParcelableExtra(Intent.EXTRA_STREAM)
     }
 }

@@ -34,7 +34,11 @@ class LoginViewModel @Inject constructor(
 
     fun startLogin() {
         val rawUrl = uiState.value.serverUrl.trim()
-        val serverUrl = if (rawUrl.startsWith("http")) rawUrl else "https://$rawUrl"
+        val serverUrl = when {
+            rawUrl.startsWith("http://") -> rawUrl
+            rawUrl.startsWith("https://") -> rawUrl
+            else -> "https://$rawUrl"  // default to https if user didn't specify
+        }
 
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, error = null) }
@@ -63,7 +67,7 @@ class LoginViewModel @Inject constructor(
                 }
                 .onFailure { e ->
                     val msg = when {
-                        e.message?.contains("CLEARTEXT") == true -> "Server requires HTTPS"
+                        e.message?.contains("CLEARTEXT") == true -> "Cannot connect — try adding http:// or https:// before the address"
                         e.message?.contains("Unable to resolve host") == true -> "Cannot find server — check the URL"
                         e.message?.contains("timeout") == true -> "Connection timed out"
                         e.message?.contains("CERTIFICATE") == true ||
