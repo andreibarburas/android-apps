@@ -11,7 +11,7 @@ I am starting to create individual Gits for each app. As a result, the app direc
 |-----|-------------|---------|--------|
 | [Blik](https://github.com/andreibarburas/blik-android/) | Screenshot manager with Nextcloud upload | 'com.brbrs.blik' | ✅ [Live on Google Play](https://play.google.com/store/apps/details?id=com.brbrs.blik) |
 | [Merk](https://github.com/andreibarburas/merk-android/) | Nextcloud Bookmarks client | 'com.brbrs.merk' | ✅ [Live on Google Play](https://play.google.com/store/apps/details?id=com.brbrs.merk) |
-| [Nóta](nota/) | Nextcloud Notes client | 'com.brbrs.nota' | ✅ [Live on Google Play](https://play.google.com/store/apps/details?id=com.brbrs.nota) |
+| [Nóta](https://github.com/andreibarburas/nota-android/) | Nextcloud Notes client | 'com.brbrs.nota' | ✅ [Live on Google Play](https://play.google.com/store/apps/details?id=com.brbrs.nota) |
 | [Qarib](https://github.com/andreibarburas/qarib-android/) | A "want to visit" places app | 'com.brbrs.qarib' | ✅ [Live on Google Play](https://play.google.com/store/apps/details?id=com.brbrs.qarib) |
 | [Runa](https://github.com/andreibarburas/runa-android/) | A personal journal | 'com.brbrs.runa' | ✅ [Live on Google Play](https://play.google.com/store/apps/details?id=com.brbrs.runa) |
 | [Vinci](https://github.com/andreibarburas/vinci-android) | Nextcloud Personal CRM | 'com.brbrs.vinci' | ✅ [Live on Google Play](https://play.google.com/store/apps/details?id=com.brbrs.vinci) |
@@ -47,7 +47,7 @@ If these apps save you time, a small tip means a lot:
 
 - **Donate:** [bunq.me/barburasdonations](https://bunq.me/barburasdonations)
 - **Website:** [barburas.com](https://barburas.com)
-- **Issues & feature requests:** [open an issue](https://github.com/andreibarburas/android-apps/issues)
+- **Issues & feature requests:**: Please open an issue in the respective app repository
 
 ## License
 
