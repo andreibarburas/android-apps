@@ -2,8 +2,8 @@
 
 A suite of beautiful, privacy-focused Android apps built for self-hosted infrastructure. All apps connect to your own server; no data collection, no ads, no third-party services.
 
-## Notice
-I am starting to create individual Gits for each app. As a result, the app directories in this Git will slowly but surely be deleted.
+## Important Notice
+Each app has now its own repo.
 
 ## Apps
 
