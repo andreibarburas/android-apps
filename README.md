@@ -7,14 +7,14 @@ Each app has now its own repo.
 
 ## Apps
 
-| App | Description | Package | Status |
-|-----|-------------|---------|--------|
-| [Blik](https://github.com/andreibarburas/blik-android/) | Screenshot manager with Nextcloud upload | 'com.brbrs.blik' | ✅ [Live on Google Play](https://play.google.com/store/apps/details?id=com.brbrs.blik) |
-| [Merk](https://github.com/andreibarburas/merk-android/) | Nextcloud Bookmarks client | 'com.brbrs.merk' | ✅ [Live on Google Play](https://play.google.com/store/apps/details?id=com.brbrs.merk) |
-| [Nóta](https://github.com/andreibarburas/nota-android/) | Nextcloud Notes client | 'com.brbrs.nota' | ✅ [Live on Google Play](https://play.google.com/store/apps/details?id=com.brbrs.nota) |
-| [Qarib](https://github.com/andreibarburas/qarib-android/) | A "want to visit" places app | 'com.brbrs.qarib' | ✅ [Live on Google Play](https://play.google.com/store/apps/details?id=com.brbrs.qarib) |
-| [Runa](https://github.com/andreibarburas/runa-android/) | A personal journal | 'com.brbrs.runa' | ✅ [Live on Google Play](https://play.google.com/store/apps/details?id=com.brbrs.runa) |
-| [Vinci](https://github.com/andreibarburas/vinci-android) | Nextcloud Personal CRM | 'com.brbrs.vinci' | ✅ [Live on Google Play](https://play.google.com/store/apps/details?id=com.brbrs.vinci) |
+| App | Description | Version | Google Play |
+|-----|-------------|---------|-------------|
+| [Blik](https://github.com/andreibarburas/blik-android/) | Screenshot manager with Nextcloud upload | ![GitHub Release](https://img.shields.io/github/v/release/andreibarburas/blik-android?style=flat&link=https://github.com/andreibarburas/blik-android/releases) | [![Get it on Google Play](https://img.shields.io/badge/Google%20Play-Download-brightgreen?logo=google-play&logoColor=white)](https://play.google.com/store/apps/details?id=com.brbrs.blik) |
+| [Merk](https://github.com/andreibarburas/merk-android/) | Nextcloud Bookmarks client | ![GitHub Release](https://img.shields.io/github/v/release/andreibarburas/merk-android?style=flat&link=https://github.com/andreibarburas/merk-android/releases) | [![Get it on Google Play](https://img.shields.io/badge/Google%20Play-Download-brightgreen?logo=google-play&logoColor=white)](https://play.google.com/store/apps/details?id=com.brbrs.merk) |
+| [Nóta](https://github.com/andreibarburas/nota-android/) | Nextcloud Notes client | ![GitHub Release](https://img.shields.io/github/v/release/andreibarburas/nota-android?style=flat&link=https://github.com/andreibarburas/nota-android/releases) | [![Get it on Google Play](https://img.shields.io/badge/Google%20Play-Download-brightgreen?logo=google-play&logoColor=white)](https://play.google.com/store/apps/details?id=com.brbrs.nota) |
+| [Qarib](https://github.com/andreibarburas/qarib-android/) | A "want to visit" places app | ![GitHub Release](https://img.shields.io/github/v/release/andreibarburas/qarib-android?style=flat&link=https://github.com/andreibarburas/qarib-android/releases) | [![Get it on Google Play](https://img.shields.io/badge/Google%20Play-Download-brightgreen?logo=google-play&logoColor=white)](https://play.google.com/store/apps/details?id=com.brbrs.qarib) |
+| [Runa](https://github.com/andreibarburas/runa-android/) | A personal journal | ![GitHub Release](https://img.shields.io/github/v/release/andreibarburas/runa-android?style=flat&link=https://github.com/andreibarburas/runa-android/releases) | [![Get it on Google Play](https://img.shields.io/badge/Google%20Play-Download-brightgreen?logo=google-play&logoColor=white)](https://play.google.com/store/apps/details?id=com.brbrs.runa) |
+| [Vinci](https://github.com/andreibarburas/vinci-android) | Nextcloud Personal CRM | ![GitHub Release](https://img.shields.io/github/v/release/andreibarburas/vinci-android?style=flat&link=https://github.com/andreibarburas/vinci-android/releases) | [![Get it on Google Play](https://img.shields.io/badge/Google%20Play-Download-brightgreen?logo=google-play&logoColor=white)](https://play.google.com/store/apps/details?id=com.brbrs.vinci) |
 
 ## Philosophy
 
