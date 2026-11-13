@@ -17,6 +17,8 @@ Each app has now its own repo.
 | [Runa](https://github.com/andreibarburas/runa-android/) | A personal journal | ![GitHub Release](https://img.shields.io/github/v/release/andreibarburas/runa-android?style=flat&link=https://github.com/andreibarburas/runa-android/releases) | [![Get it on Google Play](https://img.shields.io/badge/Google%20Play-Download-brightgreen?logo=google-play&logoColor=white)](https://play.google.com/store/apps/details?id=com.brbrs.runa) |
 | [Tavla](https://github.com/andreibarburas/tavla-android/) | Nextcloud Deck client | [![Coming Soon](https://img.shields.io/badge/coming_soon-grey?style=flat)](https://github.com/andreibarburas/tavla-android/) |  |
 | [Vinci](https://github.com/andreibarburas/vinci-android) | Nextcloud Personal CRM | ![GitHub Release](https://img.shields.io/github/v/release/andreibarburas/vinci-android?style=flat&link=https://github.com/andreibarburas/vinci-android/releases) | [![Get it on Google Play](https://img.shields.io/badge/Google%20Play-Download-brightgreen?logo=google-play&logoColor=white)](https://play.google.com/store/apps/details?id=com.brbrs.vinci) |
+| [Zaman](https://github.com/andreibarburas/zaman-android/) | Nextcloud Calendar client | [![Coming Soon](https://img.shields.io/badge/coming_soon-grey?style=flat)](https://github.com/andreibarburas/zaman-android/) |  |
+
 
 ## Philosophy
 
@@ -70,6 +72,7 @@ If my work saves you time, a small tip means a lot:
 ## Links
 
 - [Play Store](https://play.google.com/store/apps/dev?id=6842866278906089090) [![Google Play Store](https://img.shields.io/badge/Google_Play-414141?logo=google-play&logoColor=white)](https://play.google.com/store/apps/dev?id=6842866278906089090)
+- [F-Droid Self-Hosted Repo](https://android.barburas.com/repo) [![F-Droid](https://img.shields.io/badge/F--Droid-self--hosted%20repo-blue?logo=f-droid)](https://android.barburas.com/repo)
 - [r/BarburasLab](https://reddit.com/r/barburaslab) ![Subreddit subscribers](https://img.shields.io/reddit/subreddit-subscribers/BarburasLab?style=flat&logo=reddit&link=https://reddit.com/barburaslab)
 - [Privacy Policy](https://barburas.com/privacy-policy/) [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-purple.svg)](LICENSE)
 
